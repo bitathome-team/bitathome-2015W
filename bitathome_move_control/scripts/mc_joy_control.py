@@ -1,5 +1,11 @@
 #!/usr/bin/env python
-#-*-encoding:utf-8-*-
+# coding=utf-8
+# Filename : mc_joy_control.py
+# Author : AbigCarrot
+# E-mail : liudayuan94@gmail.com
+# Description : 手柄操控
+# History
+#   2014/11/16 21:44 : 创建文件 [刘达远]
 
 temp_speed = 1000
 
@@ -20,9 +26,9 @@ def joy_loop():
             continue
 
         else:
-            x = int(joyData.axes[1] * temp_speed + joyData.axes[6] * temp_speed)
-            y = int(joyData.axes[5] * temp_speed)
-            theta = int(- joyData.axes[0] * temp_speed)
+            x = int(joyData.axes[1] + joyData.axes[6])
+            y = int(joyData.axes[5])
+            theta = int(- joyData.axes[0])
             ser(x, y, theta)
             rospy.loginfo("x:%d y:%d theta:%d" % (x, y, theta))
 
