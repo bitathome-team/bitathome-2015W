@@ -26,7 +26,7 @@ def joy_loop():
         else:
             x = int(joyData.axes[1] * 1000 + joyData.axes[6] * 1000)
             y = int(joyData.axes[5] * 1000)
-            theta = int(- joyData.axes[0] * 1000)
+            theta = int(joyData.axes[0] * 1000)
             ser(x, y, theta)
             rospy.loginfo("x:%d y:%d theta:%d" % (x, y, theta))
 
