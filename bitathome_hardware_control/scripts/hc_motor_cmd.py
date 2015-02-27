@@ -6,6 +6,7 @@
 # Description : 电机驱动和码盘数据的发布
 # History
 #   2014/11/16 21:44 : 创建文件 [刘达远]
+#   2015/2/27 14:00 : 修改文件 [刘达远] : 将电机驱动参数修改成移动速度
 
 
 import rospy
@@ -16,7 +17,7 @@ import math
 
 node_name = "hc_motor_cmd"  # 节点名称
 serial_name = "/dev/ttyUSB0"  # 串口名称
-max_wheel_speed = 1500  # 最大电机转速
+max_wheel_speed = 2000  # 最大电机转速
 
 
 def run():
@@ -72,9 +73,9 @@ def handler_vector(data):
     sx = data.x
     sy = data.y
     theta = data.theta
-    sv1 = int((sx * math.sqrt(3) - sy + theta) / 3)
-    sv2 = int(- (sx * math.sqrt(3) + sy - theta) / 3)
-    sv3 = int((2 * sy + theta) / 3)
+    sv1 = int((sx * math.sqrt(3) - sy + theta) * 1449.275362319)
+    sv2 = int(- (sx * math.sqrt(3) + sy - theta) * 1449.275362319)
+    sv3 = int((2 * sy + theta) * 1449.275362319)
     buf = [0x55, 0xaa, 0x38, 0x0a, 0x08, 0x70]
     rospy.loginfo("X:%d Y:%d Theta:%d" % (sx, sy, theta))
     #55 AA 38 0A 08 70 1H 1L 2H 2L 3H 3L 4H 4L 5H 5L
@@ -118,4 +119,4 @@ if __name__ == '__main__':
     else:
         rospy.loginfo("Open serialport %s fail" % (serial_name))
         exit(0)
-        link.close()
+    link.close()
