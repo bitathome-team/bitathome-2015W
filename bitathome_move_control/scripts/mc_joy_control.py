@@ -7,8 +7,6 @@
 # History
 #   2014/11/16 21:44 : 创建文件 [刘达远]
 
-temp_speed = 1000
-
 import rospy
 from sensor_msgs.msg import *
 from bitathome_hardware_control.srv import *
@@ -26,9 +24,9 @@ def joy_loop():
             continue
 
         else:
-            x = int(joyData.axes[1] + joyData.axes[6])
-            y = int(joyData.axes[5])
-            theta = int(- joyData.axes[0])
+            x = int(joyData.axes[1] * 1000 + joyData.axes[6] * 1000)
+            y = int(joyData.axes[5] * 1000)
+            theta = int(- joyData.axes[0] * 1000)
             ser(x, y, theta)
             rospy.loginfo("x:%d y:%d theta:%d" % (x, y, theta))
 
