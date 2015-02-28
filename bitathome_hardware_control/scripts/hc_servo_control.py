@@ -11,7 +11,7 @@ from hc_serialport_communication import Communtcation
 from hc_motor_cmd import solve_sum
 
 node_name = "hc_servo_control"  # 节点名称
-serial_name = "/dev/ttyUSB0"  # 串口名称
+serial_name = "/dev/ttyUSB1"  # 串口名称
 link = Communtcation(serial_name, 19200, 8)  # 串口链接
 
 
