@@ -1,0 +1,14 @@
+int8 head
+int8 neck
+int8 r_claw
+int8 l_claw
+int8 r_shoulder
+int8 l_shoulder
+int8 r_elbow
+int8 l_elbow
+int8 r_wrist
+int8 l_wrist
+int8 speed
+
+---
+bool result
