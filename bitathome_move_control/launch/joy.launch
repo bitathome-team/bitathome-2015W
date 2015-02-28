@@ -1,5 +1,6 @@
 <launch>
     <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
+    <node pkg="bitathome_hardware_control" name="hc_servo_control" type="hc_servo_control.py"  />
     <node pkg="joy" name="joy_node" type="joy_node" output="screen" />
     <node pkg="bitathome_move_control" name="mc_joy_control" type="mc_joy_control.py" output = "screen" />
 </launch>
