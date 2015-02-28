@@ -127,12 +127,14 @@ class MoveBaseSquare():
             # If we don't get there in time, abort the goal
             if not finished_within_time:
                 self.move_base.cancel_goal()
-                rospy.loginfo("Timed out achieving goal")
+                rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print "Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             else:
                 # We made it!
                 state = self.move_base.get_state()
                 if state == GoalStatus.SUCCEEDED:
-                    rospy.loginfo("Goal succeeded!")
+                    rospy.loginfo("Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    print "Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                     
     def init_markers(self):
         # Set up our waypoint markers
