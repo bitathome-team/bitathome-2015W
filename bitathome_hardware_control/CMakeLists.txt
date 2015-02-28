@@ -56,6 +56,8 @@ add_service_files(
   FILES
   MotorSpeed.srv
   VectorSpeed.srv
+  BodyUpDownStatus.srv
+  ServoAngle.srv
 )
 
 ## Generate actions in the 'action' folder
