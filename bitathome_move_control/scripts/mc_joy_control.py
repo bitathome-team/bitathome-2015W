@@ -6,9 +6,10 @@
 # Description : 手柄操控
 # History
 #   2014/11/16 21:44 : 创建文件 [刘达远]
-#   2015/02/28 14:06 : 完善手柄功能 [马俊邦]
+#   2015/02/28 14:06 : 完善手柄功能
 
 import rospy
+import serial
 from sensor_msgs.msg import *
 from bitathome_hardware_control.srv import *
 
@@ -97,28 +98,27 @@ def joy_loop():
         if joyData is None or len(joyData.axes) is 0:
             continue
         #控制机器行进
-        #急停
-        if joyData.buttons[4] is 1:
-            ser(0,0,0)
+        if joyData.axes[1] == 0:
+            x = int((joyData.axes[7] * 300 + joyData.axes[4] * joyData.axes[7] * 300) * (1 - joyData.axes[5]) / 2)
         else:
-            x = int(joyData.axes[1] * 300 + joyData.axes[6] * 300 + joyData.axes[1] * joyData.buttons[5] * 300 +
-                    joyData.axes[6] * joyData.buttons[5] * 300)
-            y = int(joyData.axes[5] * 300)
-            theta = int(joyData.axes[0] * 200)
-            ser(x, y, theta)
-            rospy.loginfo("x:%d y:%d theta:%d" % (x, y, theta))
+            x = int((joyData.axes[1] * 300 + joyData.axes[4] * joyData.axes[1] * 300) * (1 - joyData.axes[5]) / 2)
+        y = int(joyData.axes[6] * 300)
+        theta = int(joyData.axes[0] * 300)
+        ser(x, y, theta)
+        rospy.loginfo("x:%d y:%d theta:%d" % (x, y, theta))
         #控制手臂身体运动
-        if len(joyData.buttons) is not 0:
-            l_shoulder += joyData.buttons[0] * joyData.buttons[4] * 5 + joyData.buttons[0] * joyData.buttons[6] * -5
-            r_shoulder += joyData.buttons[0] * joyData.buttons[5] * 5 + joyData.buttons[0] * joyData.buttons[7] * -5
-            l_elbow += joyData.buttons[1] * joyData.buttons[4] * 5 + joyData.buttons[1] * joyData.buttons[6] * -5
-            r_elbow += joyData.buttons[1] * joyData.buttons[5] * 5 + joyData.buttons[1] * joyData.buttons[7] * -5
-            l_wrist += joyData.buttons[2] * joyData.buttons[4] * 5 + joyData.buttons[2] * joyData.buttons[6] * -5
-            r_wrist += joyData.buttons[2] * joyData.buttons[5] * 5 + joyData.buttons[2] * joyData.buttons[7] * -5
-            l_claw += joyData.buttons[3] * joyData.buttons[4] * 5 + joyData.buttons[3] * joyData.buttons[6] * -5
-            r_claw += joyData.buttons[3] * joyData.buttons[5] * 5 + joyData.buttons[3] * joyData.buttons[7] * -5
+        if joyData.buttons[0]+joyData.buttons[1]+joyData.buttons[2] +joyData.buttons[3] \
+                +joyData.buttons[6] +joyData.buttons[7] > 0:
+            l_shoulder += joyData.buttons[2] * joyData.buttons[4] * 5 + joyData.buttons[2] * (1-joyData.axes[2])/2 * -5
+            r_shoulder += joyData.buttons[2] * joyData.buttons[5] * 5 + joyData.buttons[2] * (1-joyData.axes[5])/2 * -5
+            l_elbow += joyData.buttons[3] * joyData.buttons[4] * 5 + joyData.buttons[3] * (1-joyData.axes[2])/2 * -5
+            r_elbow += joyData.buttons[3] * joyData.buttons[5] * 5 + joyData.buttons[3] * (1-joyData.axes[5])/2  * -5
+            l_wrist += joyData.buttons[1] * joyData.buttons[4] * 5 + joyData.buttons[1] * (1-joyData.axes[2])/2 * -5
+            r_wrist += joyData.buttons[1] * joyData.buttons[5] * 5 + joyData.buttons[1] * (1-joyData.axes[5])/2  * -5
+            l_claw += joyData.buttons[0] * joyData.buttons[4] * 5 + joyData.buttons[0] * (1-joyData.axes[2])/2 * -5
+            r_claw += joyData.buttons[0] * joyData.buttons[5] * 5 + joyData.buttons[0] * (1-joyData.axes[5])/2  * -5
             #复位
-            if joyData.buttons[4] is 0 and joyData.buttons[5] is 0:
+            if joyData.buttons[8] is 1:
                 l_shoulder = 0
                 r_shoulder = 0
                 l_elbow = 0
@@ -139,9 +139,9 @@ def joy_loop():
             #手臂进行运动
             set_servo_angle(0, 0, r_claw, l_claw, r_shoulder, l_shoulder, r_elbow, l_elbow, r_wrist, l_wrist)
             #机器升降
-            if joyData.buttons[8] is 1:
+            if joyData.buttons[6] is 1:
                 body_up()
-            elif joyData.buttons[9] is 1:
+            elif joyData.buttons[7] is 1:
                 body_down()
             else:
                 body_stop()
@@ -149,8 +149,8 @@ def joy_loop():
 
 if __name__ == "__main__":
     rospy.init_node("joy_test")
-    print "手柄控制：方向键控制前进后退左右平移，左摇杆控制前进后退左右旋转，L1/L2+1/2/3/4控制左肩肘腕爪，R1/R2+1/2/3/4控制右" \
-          "肩肘腕爪，9控制上升，10控制下降，L1+R1控制复位，R1加左摇杆加速，按下L1急停"
+    print "手柄控制：方向键控制前进后退左右平移，左摇杆控制前进后退左右旋转，R2为油门，L1/L2+x/y/b/a控制左肩肘腕爪，R1/R2+x/y/b/a控制右" \
+          "肩肘腕爪，back控制上升，start控制下降，电源键控制复位，L1加左摇杆加速"
     ser = rospy.ServiceProxy("/hc_motor_cmd/vector_speed", VectorSpeed)
     joyData = Joy()
     pub = rospy.Subscriber("/joy", Joy, joy_callback)
