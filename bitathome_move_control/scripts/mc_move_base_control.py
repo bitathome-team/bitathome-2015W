@@ -14,7 +14,7 @@ from bitathome_hardware_control.srv import *
 def run(data):
     x = int(data.linear.x * 1000)
     y = int(data.linear.y * 1000)
-    theta = int(data.angular.z * 150)
+    theta = int(data.angular.z * 333) # 150
     ser(x,y,theta)
 
 if __name__ == "__main__":

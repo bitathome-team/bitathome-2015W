@@ -6,6 +6,7 @@ project(bitathome_navigation_control)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  threading
   std_msgs
   message_generation
   tf

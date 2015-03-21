@@ -5,8 +5,6 @@ clearing_rotation_allowed: false
 TrajectoryPlannerROS:
    max_vel_x: 0.3
    min_vel_x: 0.1
-   max_vel_y: 0.3
-   min_vel_y: 0.1
    max_rotational_vel: 1.0
    min_in_place_vel_theta: -1.0
    escape_vel: -0.1
@@ -16,7 +14,7 @@ TrajectoryPlannerROS:
 
    holonomic_robot: true
    yaw_goal_tolerance: 3.14 # about 6 degrees
-   xy_goal_tolerance: 0.5  # 10 cm
+   xy_goal_tolerance: 0.1  # 10 cm
    latch_xy_goal_tolerance: false
    pdist_scale: 0.8
    gdist_scale: 0.6
@@ -34,7 +32,6 @@ TrajectoryPlannerROS:
    sim_granularity: 0.025
    angular_sim_granularity: 0.025
    vx_samples: 8
-   vy_samples: 8
    vtheta_samples: 20
    dwa: true
    simple_attractor: false

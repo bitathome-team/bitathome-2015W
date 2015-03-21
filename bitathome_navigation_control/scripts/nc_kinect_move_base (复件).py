@@ -13,16 +13,25 @@ from geometry_msgs.msg import Point
 from move_base_msgs.msg import MoveBaseActionFeedback
 from bitathome_navigation_control.srv import *
 
+
+def run():
+    global pointData, feedbackData
+    pointData = Point()
+    feedbackData = MoveBaseActionFeedback()
+    cmd_vel_pub = rospy.Subscriber("/Kinect/Point", Point, run1)
+    move_base_feedback_pub = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, run2)
+
+    rospy.spin()
+
+
 def run1(data):
     global pointData
     pointData = data
-    rospy.loginfo("updata pointData")
 
 
 def run2(data):
     global feedbackData
     feedbackData = data
-    rospy.loginfo("updata feedbackData")
 
 
 def pub():
@@ -32,21 +41,20 @@ def pub():
             continue
 
         else:
-            x = int((pointData.x + feedbackData.feedback.base_position.pose.position.x)*10)/10.0
-            y = int((pointData.y + feedbackData.feedback.base_position.pose.position.y)*10)/10.0
+            x = int((pointData.x + feedbackData.feedback.base_position.pose.position.x)*100)/100.0
+            y = int((pointData.y + feedbackData.feedback.base_position.pose.position.y)*100)/100.0
             z = 0
             ser(x, y, z)
-            rospy.loginfo("x:%f y:%f theta:%f" % (x, y, z) )
-        rospy.sleep(1)
+        rospy.sleep(5)
 
 if __name__ == "__main__":
     rospy.init_node("kinect_move_base")
 
     ser = rospy.ServiceProxy("/nc_move_base_server/goal_speed", MoveBasePoint)
-    pointData = Point()
-    feedbackData = MoveBaseActionFeedback()
-    cmd_vel_pub = rospy.Subscriber("/Kinect/Point", Point, run1)
-    move_base_feedback_pub = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, run2)
+
+    thread = threading.Thread(target=run)
+    thread.setDaemon(True)
+    thread.start()
 
     pub()
 

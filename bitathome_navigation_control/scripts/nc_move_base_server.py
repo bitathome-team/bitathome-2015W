@@ -30,12 +30,12 @@ def move_base_run(data):
     q_angle = quaternion_from_euler(0, 0, theta, axes='sxyz')
     q = Quaternion(*q_angle)
 
-    waypoint = Pose(data, q)
+    waypoint = Pose(Point(data.x, data.y, data.z), q)
     p = waypoint.position
     markers.points.append(p)
 
-    cmd_vel_pub = rospy.Publisher('cmd_vel', Twist)
-    marker_pub = rospy.Publisher('waypoint_markers', Marker)
+    cmd_vel_pub = rospy.Publisher('cmd_vel', Twist, queue_size=10)
+    marker_pub = rospy.Publisher('waypoint_markers', Marker, queue_size=10)
     
     marker_pub.publish(markers)
             
@@ -51,7 +51,9 @@ def move_base_run(data):
     # Set the goal pose to the i-th waypoint
     goal.target_pose.pose = waypoint
             
+    move_base.cancel_goal()
     # Start the robot moving toward the goal
+    rospy.loginfo("SEND GOAL x:%f y:%f theta:%f" % (data.x, data.y, data.z) )
     return move(goal)
 
 
@@ -60,7 +62,7 @@ def move(goal):
     move_base.send_goal(goal)
             
     # Allow 1 minute to get there
-    finished_within_time = move_base.wait_for_result(rospy.Duration(60)) 
+    finished_within_time = move_base.wait_for_result(rospy.Duration(300)) 
             
     # If we don't get there in time, abort the goal
     if not finished_within_time:
@@ -73,6 +75,10 @@ def move(goal):
         if state == GoalStatus.SUCCEEDED:
             rospy.loginfo("Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return True
+        else:
+            move_base.cancel_goal()
+            rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            return False
 
 
 def init_markers():

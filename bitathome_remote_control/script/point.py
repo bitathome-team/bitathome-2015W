@@ -16,8 +16,8 @@ if __name__ == '__main__':
 	sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 	sock.bind(('', port))
 	rospy.loginfo("Ready!")
-	try:
-		while not rospy.is_shutdown():
+	while not rospy.is_shutdown():
+		try:
 			buf,(r_ip, r_port) = sock.recvfrom(1024)
 			print(buf, r_ip, r_port)
 			buf = buf.split(" ")
@@ -27,8 +27,8 @@ if __name__ == '__main__':
 				ret.y = float(buf[2])
 				pub.publish(ret)
 			rate.sleep()
-	except Exception,ex:
-		rospy.logerr("Socket closed!")
-		print(ex)
-		traceback.print_exc()		
+		except Exception,ex:
+			rospy.logerr("Exception!")
+			print(ex)
+			traceback.print_exc()		
 
