@@ -26,7 +26,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Visualization Manager:
   Class: ""
   Displays:
@@ -113,7 +113,7 @@ Visualization Manager:
       Marker Topic: /waypoint_markers
       Name: Marker
       Namespaces:
-        {}
+        waypoints: true
       Queue Size: 100
       Value: true
     - Alpha: 1
@@ -214,7 +214,7 @@ Visualization Manager:
         Value: false
       Name: Current View
       Near Clip Distance: 0.01
-      Scale: 240.113
+      Scale: 131.993
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
       X: 0.755064
@@ -236,5 +236,5 @@ Window Geometry:
   Views:
     collapsed: false
   Width: 1082
-  X: 188
+  X: 178
   Y: 14

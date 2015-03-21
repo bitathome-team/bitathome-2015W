@@ -4,4 +4,5 @@
   <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
   <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" output="screen" />
   <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" output="screen" />
+  <!-- node pkg="bitathome_navigation_control" name="nc_kinect_move_base" type="nc_kinect_move_base.py" output="screen" / -->
 </launch>
