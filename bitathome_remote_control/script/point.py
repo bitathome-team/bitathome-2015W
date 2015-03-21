@@ -25,6 +25,7 @@ if __name__ == '__main__':
 				ret = Point()
 				ret.x = float(buf[1])
 				ret.y = float(buf[2])
+				ret.z = float(buf[3])  # z direction is used for theata, which is the angle of the target
 				pub.publish(ret)
 			rate.sleep()
 		except Exception,ex:
