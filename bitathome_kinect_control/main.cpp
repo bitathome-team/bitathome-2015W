@@ -38,7 +38,7 @@ int main()
 			{
 				putchar('\n');
 				ZeroMemory(content, CONTENT_SIZE);
-				sprintf(content, "xy %.2lf %.2lf ", myKinect.target_x,myKinect.target_y);
+				sprintf(content, "xy %.2lf %.2lf %.2lf", myKinect.target_x, myKinect.target_y, myKinect.target_angle / PI * 180);
 				socket.Send(content);
 				flag = 0;
 			}
