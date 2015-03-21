@@ -19,4 +19,7 @@ srv_gen/
 *.obj
 *.lastbuildstate
 *.idb
+*.opensdf
+*.sdf
+*.suo
 bitathome_kinect_control/Debug/
