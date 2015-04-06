@@ -26,8 +26,8 @@ def run():
     r = rospy.Rate(50)  # 50Hz
 
     # 开启服务
-    # rospy.Service("/hc_cmd_interface/motor_speed", MotorSpeed, handler_motor)  # 电机
-    # rospy.loginfo("Open /hc_cmd_interface/motor_speed successful ^_^")
+    rospy.Service("/hc_cmd_interface/motor_speed", MotorSpeed, handler_motor)  # 电机
+    rospy.loginfo("Open /hc_cmd_interface/motor_speed successful ^_^")
     rospy.Service("/hc_motor_cmd/vector_speed", VectorSpeed, handler_vector)  # 向量
     rospy.loginfo("Open /hc_motor_cmd/vector_speed successful ^_^")
 
@@ -36,7 +36,6 @@ def run():
 
 
 # 以三个转速控制机器运动
-'''
 def handler_motor(data):
     """
     :param data: 三个轮子的速度
@@ -61,7 +60,6 @@ def handler_motor(data):
     if link.write(buf):
         return True
     return False
-'''
 
 
 # 以向量和角速度控制机器运动

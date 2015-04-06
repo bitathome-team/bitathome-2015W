@@ -8,20 +8,36 @@
 #   2015/2/27 21:44 : 创建文件 [刘达远]
 
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Point
 from bitathome_hardware_control.srv import *
 
-def run(data):
-    x = int(data.linear.x * 1000)
-    y = int(data.linear.y * 1000)
-    theta = int(data.angular.z * 333) # 150
-    ser(x,y,theta)
+def run1(data):
+    global go_stop
+    if go_stop == 1:
+        ser(0,0,0)
+    elif go_stop == 0:
+        x = int(data.linear.x * 1000)
+        y = int(data.linear.y * 1000)
+        theta = int(data.angular.z * 150) # 150
+        ser(x,y,theta)
+    else:
+        theta = go_stop * 50
+        ser(0,0,theta)
+
+
+def run2(data):
+    global go_stop
+    go_stop = data.x
+
 
 if __name__ == "__main__":
+    global go_stop
+    go_stop = 0
     rospy.init_node("move_base_control")
 
     ser = rospy.ServiceProxy("/hc_motor_cmd/vector_speed", VectorSpeed)
 
-    pub = rospy.Subscriber("/cmd_vel", Twist, run)
+    movebase_pub = rospy.Subscriber("/cmd_vel", Twist, run1)
+    kinect_pub = rospy.Subscriber("/Kinect/Style", Point, run2)
 
     rospy.spin()

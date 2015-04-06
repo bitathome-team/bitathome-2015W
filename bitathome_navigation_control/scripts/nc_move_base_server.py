@@ -24,9 +24,9 @@ cmd_vel_pub = None
 marker_pub = None
 
 
-def move_base_run(data):
+def follow_run(data):
     theta = data.z
-    data.z = 0.0;
+    data.z = 0.0
     q_angle = quaternion_from_euler(0, 0, theta, axes='sxyz')
     q = Quaternion(*q_angle)
 
@@ -53,32 +53,32 @@ def move_base_run(data):
             
     move_base.cancel_goal()
     # Start the robot moving toward the goal
-    rospy.loginfo("SEND GOAL x:%f y:%f theta:%f" % (data.x, data.y, data.z) )
-    return move(goal)
+    rospy.loginfo("SEND GOAL x:%f y:%f theta:%f" % (data.x, data.y, theta) )
+    return move(goal, data.time)
 
 
-def move(goal):
+def move(goal, time):
     # Send the goal pose to the MoveBaseAction server
     move_base.send_goal(goal)
             
     # Allow 1 minute to get there
-    finished_within_time = move_base.wait_for_result(rospy.Duration(300)) 
+    finished_within_time = move_base.wait_for_result(rospy.Duration(time)) 
             
     # If we don't get there in time, abort the goal
     if not finished_within_time:
         move_base.cancel_goal()
         rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-        return False
+        return 2
     else:
         # We made it!
         state = move_base.get_state()
         if state == GoalStatus.SUCCEEDED:
             rospy.loginfo("Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            return True
+            return 1
         else:
             move_base.cancel_goal()
             rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
-            return False
+            return 0
 
 
 def init_markers():
@@ -115,8 +115,8 @@ if __name__ == '__main__':
 
     move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    rospy.Service("/nc_move_base_server/goal_speed", MoveBasePoint, move_base_run)
-    rospy.loginfo("Open /nc_move_base_server/goal_speed successful ^_^")
+    rospy.Service("/nc_move_base_server/goal_speed", MoveBasePoint, follow_run)
+    rospy.loginfo("Open /nc_move_base_server/speed successful ^_^")
 
     init_markers()
         
