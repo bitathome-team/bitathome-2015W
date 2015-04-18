@@ -3,7 +3,7 @@
 # Filename : move_base_square.py
 # Author : AbigCarrot
 # E-mail : liudayuan94@gmail.com
-# Description : 用于调用move_base
+# Description : 用于理解move_base,给定固定的四个点,进行移动
 # History
 # 2015/2/25 21:17 : 修改文件[刘达远]
 
