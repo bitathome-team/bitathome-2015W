@@ -1,0 +1,5 @@
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\bin\Debug\udp-send.exe.config
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\bin\Debug\udp-send.exe
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\bin\Debug\udp-send.pdb
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\obj\Debug\udp-send.exe
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\obj\Debug\udp-send.pdb
