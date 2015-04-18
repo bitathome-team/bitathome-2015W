@@ -85,11 +85,13 @@ HRESULT CBodyBasics::InitializeDefaultSensor()
 /// Main processing function
 void CBodyBasics::Update()
 {
+	clear = true;
 	for ( int i = 0; i < BODY_COUNT; i ++ )
 	{
 		bodyXY[i][0] = bodyXY[i][1] = -1;
 		position[i][0] = position[i][1] = -1;
 		angle[i] = -1;
+		distance = -1;
 	}
 	//每次先清空skeletonImg
 	skeletonImg.setTo(0);
@@ -166,6 +168,7 @@ void CBodyBasics::Update()
 			*depthData = depthArray[j];
 			++depthData;
 		}
+		distance = depthArray[cDepthHeight*cDepthWidth/2 + cDepthWidth/2];
 		for ( int j = 0; j < BODY_COUNT; j ++ )
 		{
 			if ( -1 == (bodyXY[j][0] | bodyXY[j][1]) )
@@ -216,6 +219,7 @@ void CBodyBasics::ProcessBody(int nBodyCount, IBody** ppBodies)
 				hr = pBody->GetJoints(_countof(joints), joints);
 				if (SUCCEEDED(hr))
 				{
+					clear = false;
 					for (int j = 0; j < _countof(joints); ++j)
 					{
 						//将关节点坐标从摄像机坐标系（-1~1）转到深度坐标系（424*512）
@@ -224,6 +228,11 @@ void CBodyBasics::ProcessBody(int nBodyCount, IBody** ppBodies)
 					bodyXY[i][0] = depthSpacePosition[JointType_SpineMid].X;
 					bodyXY[i][1] = depthSpacePosition[JointType_SpineMid].Y;
 					angle[i]	 = atan(joints[JointType_SpineMid].Position.X / joints[JointType_SpineMid].Position.Z);
+					if ( 0 > bodyXY[i][0] || bodyXY[i][0] > 512 || 0 > bodyXY[i][1] || bodyXY[i][1] > 424 )
+					{
+						bodyXY[i][0] = -1; 
+						bodyXY[i][1] = -1; 
+					}
 
 					//------------------------hand state left-------------------------------
 					DrawHandState(depthSpacePosition[JointType_HandLeft], leftHandState);
