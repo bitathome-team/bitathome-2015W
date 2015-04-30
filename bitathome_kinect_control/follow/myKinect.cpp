@@ -1,5 +1,7 @@
 #include "myKinect.h"
 #include <iostream>
+#include	<cmath>
+#define PI 3.1415926535898
 
 /// Initializes the default Kinect sensor
 HRESULT CBodyBasics::InitializeDefaultSensor()
@@ -88,17 +90,37 @@ void CBodyBasics::Update()
 	//每次先清空skeletonImg
 	skeletonImg.setTo(0);
 
+
+	//当前帧识别状态
+	int stateNow = M_STATE_NULL;
+
+	//赋初值
+	target_x = 0;
+	target_y = 0;	
+	target_r = 0;
+	target_angle = 0;
+
+
+	d_angleLeftElbowTarget = -1;
+	d_angleLeftShoulderTarget = -1;
+	d_angleRightElbowTarget = -1;
+	d_angleRightShoulderTarget = -1;
+
+
+	bool b_leftBoxing = false;
+	bool b_leftFlat = false;
+	bool b_rightBoxing = false;
+	bool b_rightFlat = false;
+
 	//如果丢失了kinect，则不继续操作
 	if (!m_pBodyFrameReader)
 	{
-		TargetZero();
 		return;
 	}
 
 	//如果需要等待，则继续等待
 	if(m_wait_count>0){
 		m_wait_count--;
-		TargetZero();
 		return;
 	}
 
@@ -170,12 +192,81 @@ void CBodyBasics::Update()
 			++depthData;
 		}
 		// tempLogic
-		if(BodyNum == 1){
-			target_r = depthArray[ m_IBodyHeady[targetBodyIndex] * cDepthWidth +  m_IBodyHeadx[targetBodyIndex] ];
+
+		//03-29 false表明自启动以来一直未出现目标
+		if(b_firstFindBody == false ){
+
+			if(BodyNum == 1){
+
+				//03-29 说明第一次找到了那个人，那么flag置true，同时将该人设到目标原位置中
+				b_firstFindBody = true;
+
+				target_angle = d_angle[targetBodyIndex];
+
+				target_r = depthArray[ m_IBodyHeady[targetBodyIndex] * cDepthWidth +  m_IBodyHeadx[targetBodyIndex] ];
+				target_x = target_r * cos(target_angle);
+				target_y = target_r * sin(target_angle);
+
+				target_x = target_x/1000.0;
+				target_y = target_y/1000.0;
+
+				d_oldTargetX = target_x;
+				d_oldTargetY = target_y;
+				d_oldAngle	= target_angle * 180 / PI ;
+
+
+				d_angleLeftElbowTarget = d_angleLeftElbow[targetBodyIndex];
+				d_angleLeftShoulderTarget = d_angleLeftShoulder[targetBodyIndex];
+				d_angleRightElbowTarget = d_angleRightElbow[targetBodyIndex];
+				d_angleRightShoulderTarget = d_angleRightShoulder[targetBodyIndex];
+
+				
+			}
+			else //03-29 bodyNum！=1表明要么目前视野里没人，要么多个人，都无法确定哪个才是我要跟的目标
+			{
+
+			}
 		}
-		else
+		else// 03-29 表明之前已经找到过人了
 		{
-			target_r = 0;
+			bool tempFlag = false;// 03-29 标记当前数组中是否有在阈值内的跟踪目标
+			for (int i = 0; i < BODY_COUNT ; i++)
+			{
+				if (m_flagIBodyIsTracked[i]==true)//03-29 表明第i个body中存有人的数据
+				{
+					double temp_r =	depthArray[ m_IBodyHeady[i] * cDepthWidth +  m_IBodyHeadx[i] ];
+					double temp_x = temp_r * cos(d_angle[i]);
+					double temp_y = temp_r * sin(d_angle[i]);
+
+					temp_x = temp_x/1000.0;
+					temp_y = temp_y/1000.0;
+
+
+					//03-29 如果目标位置距在原位置阈值范围内
+					if(fabs(temp_x-d_oldTargetX)<=d_recognizeDis && fabs(temp_y-d_oldTargetY)<=d_recognizeDis){
+						tempFlag = true;
+						target_angle = d_angle[i];
+						target_x = temp_x;
+						target_y = temp_y;
+						target_r = temp_r;
+
+						d_oldTargetX = target_x;
+						d_oldTargetY = target_y;
+						d_oldAngle = target_angle *180 / PI;
+
+						d_angleLeftElbowTarget = d_angleLeftElbow[i];
+						d_angleLeftShoulderTarget = d_angleLeftShoulder[i];
+						d_angleRightElbowTarget = d_angleRightElbow[i];
+						d_angleRightShoulderTarget = d_angleRightShoulder[i];
+
+						break;
+					}
+				}
+			}
+
+			if(tempFlag==false){//03-29 说明原目标已经不在视野内，就停下来
+
+			}
 		}
 		delete[] depthArray;
 	}
@@ -183,12 +274,80 @@ void CBodyBasics::Update()
 	imshow("depthImg", depthImg);
 	cv::waitKey(5);
 
+	double LS = d_angleLeftShoulderTarget;
+	double LE = d_angleLeftElbowTarget;
+	double RS = d_angleRightShoulderTarget;
+	double RE = d_angleRightElbowTarget;
 
-	target_x = target_r * cos(target_angle);
-	target_y = target_r * sin(target_angle);
+	if( LS >=0 ){//表示该帧命中
+		
+		if( LS >= 150 && LS <= 210 && LE >= 230 && LE <= 320){
+			b_leftBoxing = true;
+		}
+		if( LS >= 150 && LS <= 210 && LE >=150 && LE <= 210 ){
+			b_leftFlat = true;
+		}
 
-	target_x = target_x/1000.0;
-	target_y = target_y/1000.0;
+		if( RS >= 150 && RS <= 210 && RE >= 40 && RE <= 130 ){
+			b_rightBoxing = true;
+		}
+		if( RS >= 150 && RS <= 210 && RE >=150 && RE <= 210 ){
+			b_rightFlat = true;
+		}
+
+		if(b_leftBoxing || b_rightBoxing){
+			if(b_leftBoxing && b_rightBoxing){
+				stateNow = M_STATE_DOUBLE_BOXING;
+			}
+			else
+			{
+				stateNow = M_STATE_SINGLE_BOXING;
+			}
+		}
+		else if( b_leftFlat || b_rightFlat)
+		{
+			if(b_leftFlat && b_rightFlat){
+				stateNow = M_STATE_DOUBLE_FLAT;
+			}
+			else
+			{
+				stateNow = M_STATE_SINGLE_FLAT;
+			}
+		}
+		else
+		{
+			stateNow = M_STATE_NORMAL;
+		}
+
+		//if(i_tempState != M_STATE_NULL && i_tempState != )
+
+		if(stateNow == i_tempState){//该帧与当前检测姿势相同
+			i_counterState++;
+
+			if(i_tempState != i_state && i_counterState >= i_counterStateUpperBound){//识别该姿势，将该姿势设为当前识别姿势
+				i_state = i_tempState;
+			}
+		}
+		else
+		{
+			i_tempState = stateNow;//更新检测姿势
+			i_counterState = 0;
+		}
+	}
+
+}
+/// 计算角度
+double CBodyBasics::TurnAngle(DepthSpacePoint A,DepthSpacePoint B,DepthSpacePoint C)
+{
+	double angle = 0,angle1,angle2;
+	angle1 = atan2(A.Y - B.Y, A.X - B.X) * 180 / PI;
+	angle2 = atan2(C.Y - B.Y, C.X - B.X) * 180 / PI;
+	angle = angle2 - angle1;
+	if(angle<0){
+		angle = angle + 360;
+	}
+
+	return angle;
 }
 
 /// Handle new body data
@@ -255,8 +414,8 @@ void CBodyBasics::ProcessBody(int nBodyCount, IBody** ppBodies)
 
 
 					//--------获取头在深度坐标系中的值
-					m_IBodyHeadx[i]  = depthSpacePosition[JointType_Head].X;
-					m_IBodyHeady[i]  = depthSpacePosition[JointType_Head].Y;
+					m_IBodyHeadx[i]  = depthSpacePosition[JointType_SpineMid].X;
+					m_IBodyHeady[i]  = depthSpacePosition[JointType_SpineMid].Y;
 
 					if(m_IBodyHeadx[i]<0 || m_IBodyHeadx[i]>512 || m_IBodyHeady[i]<0 || m_IBodyHeady[i]>424){
 						m_IBodyHeadx[i]  = depthSpacePosition[JointType_Neck].X;
@@ -266,7 +425,15 @@ void CBodyBasics::ProcessBody(int nBodyCount, IBody** ppBodies)
 						m_IBodyHeadx[i]  = 0;
 						m_IBodyHeady[i]  = 0;					
 					}
-					target_angle = atan(joints[JointType_Head].Position.X / joints[JointType_Head].Position.Z);
+					d_angle[i] = atan(joints[JointType_SpineMid].Position.X / joints[JointType_SpineMid].Position.Z);
+
+
+					//-----------------------2015-4-4-----------计算人体4个部分的夹角
+					d_angleLeftElbow[i] = TurnAngle(depthSpacePosition[JointType_ShoulderLeft],depthSpacePosition[JointType_ElbowLeft],depthSpacePosition[JointType_WristLeft]);
+					d_angleRightElbow[i] = TurnAngle(depthSpacePosition[JointType_ShoulderRight],depthSpacePosition[JointType_ElbowRight],depthSpacePosition[JointType_WristRight]);
+
+					d_angleLeftShoulder[i] = TurnAngle(depthSpacePosition[JointType_SpineShoulder],depthSpacePosition[JointType_ShoulderLeft],depthSpacePosition[JointType_ElbowLeft]); 					
+					d_angleRightShoulder[i] = TurnAngle(depthSpacePosition[JointType_SpineShoulder],depthSpacePosition[JointType_ShoulderRight],depthSpacePosition[JointType_ElbowRight]); 
 
 					//------------------------hand state left-------------------------------
 					DrawHandState(depthSpacePosition[JointType_HandLeft], leftHandState);
@@ -389,11 +556,23 @@ CBodyBasics::CBodyBasics() :
 	m_pCoordinateMapper(NULL),
 	m_pBodyFrameReader(NULL)
 {
+	b_firstFindBody = false;
+	d_oldTargetX = 0;
+	d_oldTargetY = 0;
+	d_oldAngle = 0;
+	d_recognizeDis = 0.45;
+
 	target_x = 0;
 	target_y = 0;
 	m_wait_count = 0;
 	target_angle = 0;
 	m_state = STATE_NORMAL;
+
+	i_counterState = 0;
+	i_counterStateUpperBound = 5;
+	i_state = M_STATE_NULL;
+	i_tempState = M_STATE_NULL;
+
 	for (int i = 0; i < 7; i++)
 	{
 		m_flagIBodyIsTracked[i] = false;
