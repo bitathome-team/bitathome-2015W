@@ -26,6 +26,8 @@ public:
 	HRESULT                 InitializeDefaultSensor();//用于初始化kinect
 	double					position[BODY_COUNT][2];	// 用于保存每个骨架的具体XY坐标
 	double					angle[BODY_COUNT];		// 用于保存角度
+	double					distance;				// 用于保存正前方深度
+	bool					clear;					// 用于保存当前视野中是否存在骨架
 
 private:
 	IKinectSensor*          m_pKinectSensor;//kinect源

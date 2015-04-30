@@ -23,3 +23,5 @@ srv_gen/
 *.sdf
 *.suo
 bitathome_kinect_control/Debug/
+bitathome_kinect_control/SR_file3/obj/
+bitathome_kinect_control/udp-send/obj/
