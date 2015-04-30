@@ -3,3 +3,9 @@ D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\bin\Debug\udp-send.pdb
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\obj\Debug\udp-send.exe
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\udp-send\obj\Debug\udp-send.pdb
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\bin\Debug\udp-send.exe.config
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\bin\Debug\udp-send.exe
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\bin\Debug\udp-send.pdb
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\obj\Debug\udp-send.csprojResolveAssemblyReference.cache
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\obj\Debug\udp-send.exe
+D:\Documents\bitathome\bitathome_kinect_control\udp-send\obj\Debug\udp-send.pdb

@@ -17,3 +17,12 @@ D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.csproj.GenerateResource.Cache
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.exe
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.pdb
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\bin\Debug\SR_file3.exe.config
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\bin\Debug\SR_file3.exe
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\bin\Debug\SR_file3.pdb
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.csprojResolveAssemblyReference.cache
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.Form1.resources
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.Properties.Resources.resources
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.csproj.GenerateResource.Cache
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.exe
+D:\Documents\bitathome\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.pdb
