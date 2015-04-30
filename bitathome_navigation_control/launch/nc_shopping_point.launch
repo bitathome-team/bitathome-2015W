@@ -1,0 +1,4 @@
+<launch>
+  <node name="nc_shopping_kinect_move_base" pkg="bitathome_navigation_control" type="nc_shopping_kinect_move_base.py" output="screen" />
+  <node name="shopping_point" pkg="bitathome_remote_control" type="shopping_point.py" output="screen" />
+</launch>

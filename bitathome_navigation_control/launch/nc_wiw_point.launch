@@ -1,0 +1,5 @@
+<launch>
+  <node name="nc_wiw_kinect_move_base" pkg="bitathome_navigation_control" type="nc_wiw_kinect_move_base.py" output="screen" />
+  <node name="wiw_point" pkg="bitathome_remote_control" type="wiw_point.py" output="screen" />
+  <node name="nc_wiw_save_point" pkg="bitathome_navigation_control" type="nc_wiw_save_point.py" output="screen" />
+</launch>

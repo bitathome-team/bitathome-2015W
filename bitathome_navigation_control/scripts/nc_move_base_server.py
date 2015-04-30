@@ -60,10 +60,14 @@ def follow_run(data):
 def move(goal, time):
     # Send the goal pose to the MoveBaseAction server
     move_base.send_goal(goal)
-            
+    rospy.loginfo("goal set")        
     # Allow 1 minute to get there
-    finished_within_time = move_base.wait_for_result(rospy.Duration(time)) 
-            
+    try:
+        finished_within_time = move_base.wait_for_result(rospy.Duration(time)) 
+    except Exception as e:
+        print e
+        rospy.loginfo(str(e))
+    rospy.loginfo("goal reached")        
     # If we don't get there in time, abort the goal
     if not finished_within_time:
         move_base.cancel_goal()
@@ -77,7 +81,7 @@ def move(goal, time):
             return 1
         else:
             move_base.cancel_goal()
-            rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            rospy.loginfo("Can't achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
             return 0
 
 

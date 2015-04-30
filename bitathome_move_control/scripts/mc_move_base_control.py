@@ -13,12 +13,13 @@ from bitathome_hardware_control.srv import *
 
 def run1(data):
     global go_stop
+    # rospy.loginfo("go_stop = %d" % go_stop)
     if go_stop == 1:
         ser(0,0,0)
     elif go_stop == 0:
         x = int(data.linear.x * 1000)
         y = int(data.linear.y * 1000)
-        theta = int(data.angular.z * 150) # 150
+        theta = int(data.angular.z * 300) # 150
         ser(x,y,theta)
     else:
         theta = go_stop * 50

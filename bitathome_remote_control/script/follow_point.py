@@ -9,7 +9,6 @@ port = 23333	# server port
 links = 1		# max link
 
 if __name__ == '__main__':
-        ser = rospy.ServiceProxy("/nc_move_base_server/goal_speed", MoveBasePoint)
 	follow_pub = rospy.Publisher('Kinect/Follow_point', Point, queue_size=10)
         style_pub = rospy.Publisher('Kinect/Style', Point, queue_size=10)
 	rospy.init_node('netPublisher', anonymous=True)
