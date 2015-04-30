@@ -17,3 +17,4 @@ D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.csproj.GenerateResource.Cache
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.exe
 D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.pdb
+D:\My Documents\Documents\bitathome\bitathome-2015W\bitathome_kinect_control\SR_file3\obj\Debug\SR_file3.csprojResolveAssemblyReference.cache
