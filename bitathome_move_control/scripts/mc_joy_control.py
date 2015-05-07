@@ -138,13 +138,13 @@ def joy_loop():
             l_wrist = constrain(l_wrist, -60, 60)
             #手臂进行运动
             set_servo_angle(0, 0, r_claw, l_claw, r_shoulder, l_shoulder, r_elbow, l_elbow, r_wrist, l_wrist)
-            #机器升降
-            if joyData.buttons[6] is 1:
-                body_up()
-            elif joyData.buttons[7] is 1:
-                body_down()
-            else:
-                body_stop()
+        #机器升降
+        if joyData.buttons[6] is 1:
+            body_up()
+        elif joyData.buttons[7] is 1:
+            body_down()
+        else:
+            body_stop()
         rospy.sleep(0.5)
 
 if __name__ == "__main__":

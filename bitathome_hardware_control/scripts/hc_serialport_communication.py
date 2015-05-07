@@ -69,7 +69,7 @@ class Communtcation():
         buf = bytearray(data)
 
         self.link.write(buf)
-        rospy.loginfo("Serial writing succeeded ^_^")
+        # rospy.loginfo("Serial writing succeeded ^_^")
 
         return True
 

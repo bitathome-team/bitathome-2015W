@@ -12,17 +12,18 @@ from geometry_msgs.msg import Point
 from move_base_msgs.msg import MoveBaseActionFeedback
 from tf.transformations import euler_from_quaternion
 from bitathome_remote_control.srv import say
+from bitathome_navigation_control.msg import *
 from bitathome_navigation_control.srv import *
 import math
 
 
 # 更新kinect传过来的follow相对坐标
 def run1(data):
-    global pointData
+    global pointData, points, feedbackData
     if data.time == 0:
     	pointData = data
     elif abs(data.time) < 5:
-        it = data.time
+        it = abs(data.time)
         data.x = feedbackData.feedback.base_position.pose.position.x
         data.y = feedbackData.feedback.base_position.pose.position.y
         data.z = data.time / abs(data.time)
@@ -30,8 +31,21 @@ def run1(data):
         z = euler_from_quaternion(quaternion, axes='sxyz')
         data.z = z[2] + data.z * math.pi / 2
         points[it] = data
-    elif points[data.x] is not None:
-        ser(points[data.x].x, points[data.x].y, points[data.x].z, 60)
+        rospy.loginfo("Add %d is : X:%f Y:%f Theta:%f" % (it, data.x, data.y, data.z))
+    elif data.time == 5:
+        data.x = feedbackData.feedback.base_position.pose.position.x
+        data.y = feedbackData.feedback.base_position.pose.position.y
+        data.z = data.time / abs(data.time)
+        quaternion = (feedbackData.feedback.base_position.pose.orientation.x, feedbackData.feedback.base_position.pose.orientation.y, feedbackData.feedback.base_position.pose.orientation.z, feedbackData.feedback.base_position.pose.orientation.w)
+        z = euler_from_quaternion(quaternion, axes='sxyz')
+        data.z = z[2]
+        points[0] = data
+        rospy.loginfo("Add home is : X:%f Y:%f Theta:%f" % (data.x, data.y, data.z))
+    elif points[data.time-5] is not None:
+        pointData.x = points[data.time-5].x
+        pointData.y = points[data.time-5].y
+        pointData.z = points[data.time-5].z
+        pointData.time = data.time
     else:
         rospy.loginfo("I can't find it.")
     #rospy.loginfo("updata pointData")
@@ -55,15 +69,24 @@ def shopping_pub():
             continue
 
         elif flag:
-            # 和记录的目标节点相距0.2米为目标点
-            x = int((pointData.x - 0.2 * math.cos(pointData.z) + feedbackData.feedback.base_position.pose.position.x) * 100) / 100.0
-            y = int((pointData.y - 0.2 * math.sin(pointData.z) + feedbackData.feedback.base_position.pose.position.y) * 100) / 100.0
-            quaternion = (feedbackData.feedback.base_position.pose.orientation.x, feedbackData.feedback.base_position.pose.orientation.y, feedbackData.feedback.base_position.pose.orientation.z, feedbackData.feedback.base_position.pose.orientation.w)
-            # z[0] x轴旋转轴的旋转角度, z[1] y轴, z[2] z轴
-            z = euler_from_quaternion(quaternion, axes='sxyz')
-            theta = z[2] + pointData.z
-            ser(x, y, theta, 15)
-            rospy.loginfo("x:%f y:%f theta:%f" % (x, y, theta * 180 / math.pi))
+            if pointData.time == 0:
+                # 和记录的目标节点相距0.2米为目标点
+                x = int((pointData.x - 0.5 * math.cos(pointData.z) + feedbackData.feedback.base_position.pose.position.x) * 100) / 100.0
+                y = int((pointData.y - 0.5 * math.sin(pointData.z) + feedbackData.feedback.base_position.pose.position.y) * 100) / 100.0
+                quaternion = (feedbackData.feedback.base_position.pose.orientation.x, feedbackData.feedback.base_position.pose.orientation.y, feedbackData.feedback.base_position.pose.orientation.z, feedbackData.feedback.base_position.pose.orientation.w)
+                # z[0] x轴旋转轴的旋转角度, z[1] y轴, z[2] z轴
+                z = euler_from_quaternion(quaternion, axes='sxyz')
+                theta = z[2] + pointData.z
+                ser(x, y, theta, 15)
+                # rospy.loginfo("x:%f y:%f theta:%f" % (x, y, theta * 180 / math.pi))
+            elif pointData.time > 5:
+                result = 2
+                while result == 2:
+                    result = int(str(ser(pointData.x, pointData.y, pointData.z, 60))[8])
+                if result == 1:
+                    rospy.loginfo("I get")
+                else:
+                    rospy.loginfo("I con't get to there.")
 
 
 if __name__ == "__main__":
@@ -71,11 +94,11 @@ if __name__ == "__main__":
 
     ser = rospy.ServiceProxy("/nc_move_base_server/goal_speed", MoveBasePoint)
     say_ser = rospy.ServiceProxy("AudioPlay/TTS", say)
-    pointData = Point()
+    pointData = MovePoint()
     feedbackData = MoveBaseActionFeedback()
     flag = True
     points = [None for i in range(5)]
-    point_pub = rospy.Subscriber("/Kinect/Shopping_point", MoveBasePoint, run1)
+    point_pub = rospy.Subscriber("/Kinect/Shopping_point", MovePoint, run1)
     move_base_feedback_pub = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, run2)
 
     shopping_pub()

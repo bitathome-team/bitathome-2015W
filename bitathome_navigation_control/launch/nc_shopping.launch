@@ -15,8 +15,8 @@
   <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
   <include file="$(find bitathome_navigation_control)/launch/tb_amcl.launch" />
   <include file="$(find bitathome_navigation_control)/launch/shopping_move_base.launch" />
-  <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" output="screen" />
-  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" output="screen" />
+  <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" output="screen"/>
+  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" />
 
   <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
   <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" />
