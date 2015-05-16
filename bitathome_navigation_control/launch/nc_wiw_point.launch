@@ -1,5 +1,11 @@
 <launch>
-  <node name="nc_wiw_kinect_move_base" pkg="bitathome_navigation_control" type="nc_wiw_kinect_move_base.py" output="screen" />
+  <!-- 打开who is who目标点给定程序 输出目标点坐标及状态>
+  <node name="nc_wiw_kinect_move_base" pkg="bitathome_navigation_control" type="nc_wiw_kinect_move_base.py" output="screen" / -->
+  <node pkg="bitathome_navigation_control" name="wiw" type="wiw.py" output="screen" />
+
+  <!-- 打开辨别目标点是否合法程序 输出添加点坐标 -->
   <node name="wiw_point" pkg="bitathome_remote_control" type="wiw_point.py" output="screen" />
+
+  <!-- 打开who is who通讯程序 输出接收到信息字符串 -->
   <node name="nc_wiw_save_point" pkg="bitathome_navigation_control" type="nc_wiw_save_point.py" output="screen" />
 </launch>

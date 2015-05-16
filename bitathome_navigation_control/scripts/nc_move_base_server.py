@@ -24,7 +24,7 @@ cmd_vel_pub = None
 marker_pub = None
 
 
-def follow_run(data):
+def run(data):
     theta = data.z
     data.z = 0.0
     q_angle = quaternion_from_euler(0, 0, theta, axes='sxyz')
@@ -60,18 +60,18 @@ def follow_run(data):
 def move(goal, time):
     # Send the goal pose to the MoveBaseAction server
     move_base.send_goal(goal)
-    rospy.loginfo("goal set")        
+    # rospy.loginfo("goal set")        
     # Allow 1 minute to get there
     try:
         finished_within_time = move_base.wait_for_result(rospy.Duration(time)) 
     except Exception as e:
         print e
         rospy.loginfo(str(e))
-    rospy.loginfo("goal reached")        
+    # rospy.loginfo("goal reached")        
     # If we don't get there in time, abort the goal
     if not finished_within_time:
         move_base.cancel_goal()
-        rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+        rospy.loginfo("Timed out achieving goal~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         return 2
     else:
         # We made it!
@@ -81,7 +81,7 @@ def move(goal, time):
             return 1
         else:
             move_base.cancel_goal()
-            rospy.loginfo("Can't achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+            rospy.loginfo("Can't achieving goal?????????????????????????????????????????????????")
             return 0
 
 
@@ -119,7 +119,7 @@ if __name__ == '__main__':
 
     move_base = actionlib.SimpleActionClient("move_base", MoveBaseAction)
 
-    rospy.Service("/nc_move_base_server/goal_speed", MoveBasePoint, follow_run)
+    rospy.Service("/nc_move_base_server/goal_speed", MoveBasePoint, run)
     rospy.loginfo("Open /nc_move_base_server/speed successful ^_^")
 
     init_markers()

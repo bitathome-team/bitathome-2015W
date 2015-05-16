@@ -1,0 +1,14 @@
+<launch>
+
+  <param name="use_sim_time" value="false" />
+
+  <!-- 打开sick 定义base和laser的tf -->
+  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
+
+  <!-- 打开底座控制 输出串口打开关闭信息 -->
+  <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
+
+  <node pkg="bitathome_navigation_control" name="follow_cmd" type="follow.py" output="screen" />
+
+  <node name="follow_point" pkg="bitathome_remote_control" type="point.py" output="screen" />
+</launch>

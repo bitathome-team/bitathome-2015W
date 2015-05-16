@@ -15,18 +15,18 @@
 
   <!-- 打开底座控制 输出串口打开关闭信息 -->
   <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
-  
+
   <!-- 导入amcl配置文件 -->
   <include file="$(find bitathome_navigation_control)/launch/tb_amcl.launch" />
 
-  <!-- 导入who is who的move_bsae的配置文件 -->
-  <include file="$(find bitathome_navigation_control)/launch/wiw_move_base.launch" />
+  <!-- 导入shopping的move_bsae的配置文件 -->
+  <include file="$(find bitathome_navigation_control)/launch/shopping_move_base.launch" />
 
   <!-- 打开move_base_server 输出move_base计算情况,收到目标点坐标,到达目标点情况 -->
-  <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" output="screen" />
+  <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" />
 
-  <!-- 打开move_base控制翻译程序 -->
-  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" output="screen" />
+  <!-- 打开move_base控制翻译程序 >
+  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" / -->
 
   <!-- 绑定码map与odom的tf -->
   <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />

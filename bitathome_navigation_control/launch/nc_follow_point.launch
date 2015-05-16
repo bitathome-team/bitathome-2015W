@@ -1,0 +1,7 @@
+<launch>
+  <!-- 打开follow目标点给定程序 -->
+  <node name="nc_follow_kinect_move_base" pkg="bitathome_navigation_control" type="nc_follow_kinect_move_base.py" />
+
+  <!-- 打开follow通讯程序 输出接收到信息字符串 -->
+  <node name="follow_point" pkg="bitathome_remote_control" type="follow_point.py" output="screen" />
+</launch>

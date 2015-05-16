@@ -15,7 +15,7 @@ TrajectoryPlannerROS:
    acc_lim_theta: 3.2
 
    holonomic_robot: true
-   yaw_goal_tolerance: 0.2 # about 6 degrees
+   yaw_goal_tolerance: 0.1 # about 6 degrees
    xy_goal_tolerance: 0.1  # 10 cm
    latch_xy_goal_tolerance: false
    pdist_scale: 0.8

@@ -39,9 +39,6 @@ def follow_pub():
         if pointData is None or feedbackData is None:
             continue
 
-        elif math.fabs(pointData.x) < 0.01 and math.fabs(pointData.y) < 0.01:
-            continue
-
         else:
             # 和记录的目标节点相距0.2米为目标点
             x = int((pointData.x - 0.2 * math.cos(pointData.z) + feedbackData.feedback.base_position.pose.position.x) * 100) / 100.0
@@ -50,8 +47,8 @@ def follow_pub():
             # z[0] x轴旋转轴的旋转角度, z[1] y轴, z[2] z轴
             z = euler_from_quaternion(quaternion, axes='sxyz')
             theta = z[2] + pointData.z
-            ser(x, y, theta, 15)
             rospy.loginfo("x:%f y:%f theta:%f" % (x, y, theta * 180 / math.pi))
+            ser(x, y, theta, 1)
 
 
 if __name__ == "__main__":

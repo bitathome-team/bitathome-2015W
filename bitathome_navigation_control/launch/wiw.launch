@@ -25,8 +25,8 @@
   <!-- 打开move_base_server 输出move_base计算情况,收到目标点坐标,到达目标点情况 -->
   <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" output="screen" />
 
-  <!-- 打开move_base控制翻译程序 -->
-  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" output="screen" />
+  <!-- 打开move_base控制翻译程序 >
+  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" output="screen" / -->
 
   <!-- 绑定码map与odom的tf -->
   <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />

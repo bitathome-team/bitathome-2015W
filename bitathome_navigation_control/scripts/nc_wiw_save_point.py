@@ -24,7 +24,7 @@ def run1(data):
             flag = False
             break
     if flag:
-        rospy.logerr("ADD POS X:%f Y:%f" % (people.x, people.y))
+        rospy.loginfo("ADD POS X:%f Y:%f" % (people.x, people.y))
         points.append(people)
         wiw_pub.publish(people)
 
