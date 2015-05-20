@@ -87,7 +87,7 @@ class MoveBaseSquare():
         rospy.loginfo("Waiting for move_base action server...")
         
         # Wait 60 seconds for the action server to become available
-        self.move_base.wait_for_server(rospy.Duration(60))
+        self.move_base.wait_for_server(rospy.Duration(10))
         
         rospy.loginfo("Connected to move base server")
         rospy.loginfo("Starting navigation test")
@@ -122,8 +122,13 @@ class MoveBaseSquare():
             self.move_base.send_goal(goal)
             
             # Allow 1 minute to get there
+<<<<<<< HEAD
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
+
+=======
             finished_within_time = self.move_base.wait_for_result(rospy.Duration(300)) 
             
+>>>>>>> 4076533577af4372a0ea904f4aa284f72fdb0e0d
             # If we don't get there in time, abort the goal
             if not finished_within_time:
                 self.move_base.cancel_goal()
