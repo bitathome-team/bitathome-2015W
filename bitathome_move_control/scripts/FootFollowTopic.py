@@ -138,7 +138,7 @@ def Judge():
 if __name__ == "__main__":
     rospy.init_node("FootFollow", anonymous=True)
     #初始化节点        
-    pub = rospy.Publisher('FootFollow_topic', FootFollow, queue_size=10)
+    pub = rospy.Publisher("FootFollow_topic", FootFollow, queue_size=10)
     rate = rospy.Rate(10) # 10hz
     #发布话题
     ser = rospy.ServiceProxy("/hc_motor_cmd/vector_speed", VectorSpeed)
