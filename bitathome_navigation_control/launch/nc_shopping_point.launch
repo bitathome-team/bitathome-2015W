@@ -1,0 +1,7 @@
+<launch>
+  <!-- 打开shopping目标点给定程序 输出目标点坐标及编号-->
+  <node name="nc_shopping_kinect_move_base" pkg="bitathome_navigation_control" type="shopping.py" output="screen" />
+
+  <!-- 打开shopping通讯程序 输出接收到信息字符串 -->
+  <node name="shopping_point" pkg="bitathome_remote_control" type="shopping_point.py" output="screen" />
+</launch>

@@ -1,0 +1,38 @@
+<launch>
+
+  <param name="use_sim_time" value="false" />
+
+  <!-- 打开地图 -->
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find bitathome_navigation_control)/maps/big.yaml" />
+
+  <!-- 打开sick 定义base和laser的tf -->
+  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
+
+  <!-- 打开激光定位 提供码盘数据 -->
+  <node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">
+    <param name="fixed_frame" value="odom" />
+  </node>
+
+  <!-- 打开底座控制 输出串口打开关闭信息 -->
+  <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
+
+  <!-- 导入amcl配置文件 -->
+  <include file="$(find bitathome_navigation_control)/launch/tb_amcl.launch" />
+
+  <!-- 导入shopping的move_bsae的配置文件 -->
+  <include file="$(find bitathome_navigation_control)/launch/shopping_move_base.launch" />
+
+  <!-- 打开move_base_server 输出move_base计算情况,收到目标点坐标,到达目标点情况 -->
+  <node pkg="bitathome_navigation_control" name="nc_move_base_server" type="nc_move_base_server.py" />
+
+  <!-- 打开move_base控制翻译程序 >
+  <node pkg="bitathome_move_control" name="mc_move_base_control" type="mc_move_base_control.py" / -->
+
+  <!-- 绑定码map与odom的tf -->
+  <node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" />
+
+  <!-- 打开语音节点 输出所说内容 -->
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" />
+  <node name="AudioPlay" pkg="bitathome_remote_control" type="AudioPlay.py" output="screen" />
+
+</launch>

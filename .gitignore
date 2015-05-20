@@ -11,3 +11,17 @@ srv_gen/
 *.swp
 .idea
 *~
+*.exe
+*.ilk
+*.log
+*.pdb
+*.tlog
+*.obj
+*.lastbuildstate
+*.idb
+*.opensdf
+*.sdf
+*.suo
+bitathome_kinect_control/Debug/
+bitathome_kinect_control/SR_file3/obj/
+bitathome_kinect_control/udp-send/obj/

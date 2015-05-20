@@ -36,7 +36,6 @@ def run():
 
 
 # 以三个转速控制机器运动
-'''
 def handler_motor(data):
     """
     :param data: 三个轮子的速度
@@ -61,7 +60,6 @@ def handler_motor(data):
     if link.write(buf):
         return True
     return False
-'''
 
 
 # 以向量和角速度控制机器运动
@@ -77,8 +75,8 @@ def handler_vector(data):
     sv2 = int(- (sx * math.sqrt(3) + sy - theta) * 1.449275362319)
     sv3 = int((2 * sy + theta) * 1.449275362319)
     buf = [0x55, 0xaa, 0x38, 0x0a, 0x08, 0x70]
-    rospy.loginfo("X:%d Y:%d Theta:%d" % (sx, sy, theta))
-    #55 AA 38 0A 08 70 1H 1L 2H 2L 3H 3L 4H 4L 5H 5L
+    # rospy.loginfo("X:%d Y:%d Theta:%d" % (sx, sy, theta))
+    # 55 AA 38 0A 08 70 1H 1L 2H 2L 3H 3L 4H 4L 5H 5L
 
     if math.fabs(sv1) > max_wheel_speed or math.fabs(sv2) > max_wheel_speed or math.fabs(sv3) > max_wheel_speed:
         rospy.loginfo("You fly too low!!! ⊙_⊙")

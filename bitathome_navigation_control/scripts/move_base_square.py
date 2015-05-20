@@ -3,7 +3,7 @@
 # Filename : move_base_square.py
 # Author : AbigCarrot
 # E-mail : liudayuan94@gmail.com
-# Description : 用于调用move_base
+# Description : 用于理解move_base,给定固定的四个点,进行移动
 # History
 # 2015/2/25 21:17 : 修改文件[刘达远]
 
@@ -122,17 +122,24 @@ class MoveBaseSquare():
             self.move_base.send_goal(goal)
             
             # Allow 1 minute to get there
+<<<<<<< HEAD
             finished_within_time = self.move_base.wait_for_result(rospy.Duration(60)) 
 
+=======
+            finished_within_time = self.move_base.wait_for_result(rospy.Duration(300)) 
+            
+>>>>>>> 4076533577af4372a0ea904f4aa284f72fdb0e0d
             # If we don't get there in time, abort the goal
             if not finished_within_time:
                 self.move_base.cancel_goal()
-                rospy.loginfo("Timed out achieving goal")
+                rospy.loginfo("Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print "Timed out achieving goal!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
             else:
                 # We made it!
                 state = self.move_base.get_state()
                 if state == GoalStatus.SUCCEEDED:
-                    rospy.loginfo("Goal succeeded!")
+                    rospy.loginfo("Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                    print "Goal succeeded!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
                     
     def init_markers(self):
         # Set up our waypoint markers

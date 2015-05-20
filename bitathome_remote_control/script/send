@@ -1,0 +1,18 @@
+#!/use/bin/python
+#-*- encoding: utf-8 -*-
+
+from socket import *
+
+HOST = '192.168.0.10'
+PORT = 2333
+
+
+if __name__ == "__main__":
+    ADDR = (HOST, PORT)
+
+    udpCliSock = socket(AF_INET, SOCK_DGRAM)
+
+    data = ""
+    udpCliSock.sendto(data, ADDR)
+
+    udpCliSock.close()
