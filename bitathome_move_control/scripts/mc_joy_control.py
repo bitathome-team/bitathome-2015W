@@ -109,6 +109,7 @@ def joy_loop():
         #控制手臂身体运动
         if joyData.buttons[0]+joyData.buttons[1]+joyData.buttons[2] +joyData.buttons[3] \
                 +joyData.buttons[6] +joyData.buttons[7] > 0:
+            print "1111"
             l_shoulder += joyData.buttons[2] * joyData.buttons[4] * 5 + joyData.buttons[2] * (1-joyData.axes[2])/2 * -5
             r_shoulder += joyData.buttons[2] * joyData.buttons[5] * 5 + joyData.buttons[2] * (1-joyData.axes[5])/2 * -5
             l_elbow += joyData.buttons[3] * joyData.buttons[4] * 5 + joyData.buttons[3] * (1-joyData.axes[2])/2 * -5
@@ -139,12 +140,12 @@ def joy_loop():
             #手臂进行运动
             set_servo_angle(0, 0, r_claw, l_claw, r_shoulder, l_shoulder, r_elbow, l_elbow, r_wrist, l_wrist)
         #机器升降
-        if joyData.buttons[6] is 1:
-            body_up()
-        elif joyData.buttons[7] is 1:
-            body_down()
-        else:
-            body_stop()
+        #if joyData.buttons[6] is 1:
+            #body_up()
+        #elif joyData.buttons[7] is 1:
+            #body_down()
+        #else:
+            #body_stop()
         rospy.sleep(0.5)
 
 if __name__ == "__main__":

@@ -19,48 +19,51 @@ def run1(data):
 
 
 def run2(data):
-    global styleData
-    if data.X ** 2 + data.Y ** 2 < 0.09:
+    global styleData, speed
+    if data.X < 0:
+        styleData = "stop"
+    elif data.X ** 2 + data.Y ** 2 < 0.09:
         styleData = "back"
     elif data.X ** 2 + data.Y ** 2 < 1.44:
-        if data.Y / data.X  > 0.6:
+        if data.Y / data.X  > 0.1:
             styleData = "left"
-        elif data.Y / data.X < 0 - 0.6:
+        elif data.Y / data.X < 0 - 0.1:
             styleData = "right"
         else:
             styleData = "stop"
-    else
-        if data.Y / data.X  > 0.6:
+    else:
+        if data.Y / data.X  > 0.1:
             styleData = "goLeft"
-        elif data.Y / data.X < 0 - 0.6:
+        elif data.Y / data.X < 0 - 0.1:
             styleData = "goRight"
         else:
             styleData = "go"
+    speed = math.atan((data.X ** 2 + data.Y ** 2) ** 0.5) * 10
 
 
 def follow_pub():
     global scanData, styleData
     while not rospy.is_shutdown():
-        if scanData is None or styleData.s is None or styleData.s == "":
+        if scanData is None or styleData == "":
             continue
-        rospy.loginfo("%s" % styleData.s)
+        rospy.loginfo("%s" % styleData)
         i = 0
         flag = False
         for it in scanData:
-            if it < 0.50 and it > 0.09 and styleData.s == "back":
+            if it < 0.50 and it > 0.09 and styleData == "back":
                 if i < 90:
                     ser(0, 200, (i - 90))
                 elif i > 360:
                     ser(0, 0 - 200, (i - 360))
                 flag = True
-                rospy.sleep(0.5)
-            if it < 0.30 and it > 0.09 and styleData.s != "back":
+                rospy.sleep(0.1)
+            if it < 0.30 and it > 0.09 and styleData != "back":
                 if i < 270:
                     ser(0, 150, (i - 270) / 3)
                 elif i < 360:
                     ser(0, 0 - 150, (i - 270) / 3)
                 flag = True
-                rospy.sleep(0.5)
+                rospy.sleep(0.1)
                 break
             i += 1
         if flag:
@@ -69,18 +72,18 @@ def follow_pub():
         if styleData == "stop":
             ser(0,0,0)
         elif styleData == "go":
-            ser(300,0,0)
+            ser(200*speed,0,0)
         elif styleData == "goRight":
-            ser(200,0,0-150)
+            ser(200*speed,0,(0-67)*speed)
         elif styleData == "goLeft":
-            ser(200,0,150)
+            ser(200*speed,0,67*speed)
         elif styleData == "right":
-            ser(0,0,0-200)
+            ser(0,0,0-100)
         elif styleData == "left":
-            ser(0,0,200)
+            ser(0,0,100)
         elif styleData == "back":
             ser(-200,0,0)
-        rospy.sleep(0.5)
+        rospy.sleep(0.1)
 
 
 if __name__ == "__main__":
@@ -89,6 +92,7 @@ if __name__ == "__main__":
     ser = rospy.ServiceProxy("/hc_motor_cmd/vector_speed", VectorSpeed)
     scanData = list()
     styleData = ""
+    speed = 0
     scan_pub = rospy.Subscriber("/scan", LaserScan, run1)
     point_pub = rospy.Subscriber("FootFollow_topic", FootFollow, run2)
     follow_pub()

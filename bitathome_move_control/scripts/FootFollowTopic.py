@@ -10,8 +10,7 @@
 
 
 
-import rospy
-import math
+import rospy, math
 from bitathome_hardware_control.srv import *
 from sensor_msgs.msg import LaserScan
 from bitathome_move_control.msg import *
@@ -90,7 +89,7 @@ def Curve():
         curve = Lk / Dk
         xc = 0
         yc = 0
-        if curve > 1.1 and Lk > 0.06 and Lk < 0.2:
+        if curve > 0.7 and Lk > 0.06 and Lk < 0.2:
             for k in range(0, length - 1):
                 xc += Ck[i][k][0] * math.cos((Ck[i][k][1] * 0.5 - 135) / 180 * math.pi)
                 yc += Ck[i][k][0] * math.sin((Ck[i][k][1] * 0.5 - 135) / 180 * math.pi)
@@ -101,7 +100,7 @@ def Curve():
     ##if len(Curve_data) > 0:
         ##print Curve_data
 def Judge():
-    global Curve_data, X, Y, Curvedata
+    global Curve_data, X, Y, Curvedata, flag
     Len = len(Curve_data)
     minx = 1000
     ans = -1
@@ -116,17 +115,37 @@ def Judge():
             X = Curve_data[ans][1]
             Y = Curve_data[ans][2]
             Curvedata = Curve_data[ans][0]
-    
-    else:
+
+    elif X == -2:
         for i in range(0, Len - 1):
-            L_dis = math.sqrt((Curve_data[i][1] - X) ** 2 + (Curve_data[i][2] - Y) ** 2)
-            if L_dis < minx and L_dis < 0.5:
-                ans = i
-                minx = L_dis
+            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 2.0:
+                if minx > abs(Curve_data[i][2]):
+                    ans = i
+                    minx = Curve_data[i][2]
+        minx = 1000
         if Len > 0.1 and ans > -1:
+            flag = 0
             X = Curve_data[ans][1]
             Y = Curve_data[ans][2]
             Curvedata = Curve_data[ans][0]
+
+    else:
+        for i in range(0, Len - 1):
+            L_dis = math.sqrt((Curve_data[i][1] - X) ** 2 + (Curve_data[i][2] - Y) ** 2)
+            if L_dis < minx and L_dis < 0.3:
+                ans = i
+                minx = L_dis
+        if Len > 0.1 and ans > -1:
+            flag = 0
+            X = Curve_data[ans][1]
+            Y = Curve_data[ans][2]
+            Curvedata = Curve_data[ans][0]
+        else:
+            flag+=1
+            if flag > 150:
+                X = -2
+                Y = None
+                Curvedata = None
 
     print X
     print Y
@@ -147,6 +166,7 @@ if __name__ == "__main__":
     #激光数据 list()类型
     scan_pub = rospy.Subscriber("/scan", LaserScan, run)
     #操作函数
+    flag = 0
     X = -1
     Y = None
     Curvedata = -1
