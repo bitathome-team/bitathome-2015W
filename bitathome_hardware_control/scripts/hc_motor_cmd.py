@@ -111,7 +111,6 @@ def solve_sum(buf):
 if __name__ == '__main__':
 
     link = Communtcation(serial_name, 2000000, 8)  # 串口链接
-
     if link.open():
         run()
     else:
