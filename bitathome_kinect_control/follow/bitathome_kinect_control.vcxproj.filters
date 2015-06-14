@@ -21,12 +21,24 @@
     <ClCompile Include="myKinect.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ColorBasic-OpenCV.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="myKinect.h">
-      <Filter>源文件</Filter>
-    </ClInclude>
     <ClInclude Include="SocketConnect.hpp">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="stdafx.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="myKinect.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
