@@ -41,7 +41,7 @@ def my_move_base():
         if feedbackData == Pose() or scanData == [] or goalPointData == MyPoint():
             continue
 
-        if (feedbackData.position.x - goalPointData.x) ** 2 + (feedbackData.position.y - goalPointData.y) ** 2 < 0.09:
+        if (feedbackData.position.x - goalPointData.x) ** 2 + (feedbackData.position.y - goalPointData.y) ** 2 < 0.01:
             quaternion = (feedbackData.orientation.x, feedbackData.orientation.y, feedbackData.orientation.z, feedbackData.orientation.w)
             z = euler_from_quaternion(quaternion, axes='sxyz')
             theta = z[2] - goalPointData.z
@@ -57,11 +57,11 @@ def my_move_base():
                 else:
                     motor_ser(0, 0, 0 - 88)
             elif say_key:
-                motor_ser(0,0,0)
+                motor_ser(0, 0, 0)
                 say_ser(goalPointData.say)
                 say_key = False
             else:
-                motor_ser(0,0,0)
+                motor_ser(0, 0, 0)
             continue
 
         nowx = goalPointData.x - feedbackData.position.x
