@@ -94,3 +94,23 @@ private:
 	cv::Mat depthImg;
 };
 
+
+
+//定义Kinect方法类
+class Kinect
+{
+public:
+	static const int        cColorWidth  = 1920;
+	static const int        cColorHeight = 1080;
+	Kinect();
+	~Kinect();
+	HRESULT					InitKinect();//初始化Kinect
+	void					Update();//更新数据
+	void					ProcessColor(RGBQUAD* pBuffer, int nWidth, int nHeight);//处理得到的数据
+private:
+	
+	IKinectSensor*          m_pKinectSensor;// Current Kinect
+	IColorFrameReader*      m_pColorFrameReader;// Color reader
+	RGBQUAD*                m_pColorRGBX;
+
+};

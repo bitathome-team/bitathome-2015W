@@ -19,12 +19,16 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ColorBasic-OpenCV.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="myKinect.cpp" />
+    <ClCompile Include="stdafx.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="myKinect.h" />
     <ClInclude Include="SocketConnect.hpp" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{04B15B8C-7D91-48BC-8050-C8319DE15472}</ProjectGuid>

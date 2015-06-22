@@ -31,12 +31,17 @@ int main()
 	int sleepCount = 0;
 	CBodyBasics myKinect;
 	HRESULT hr = myKinect.InitializeDefaultSensor();
+
+	Kinect kinect;
+	kinect.InitKinect();
+
+
 	if (SUCCEEDED(hr)){
 		for ( char flag = 1; true; flag ++ )
 		{
 
 			myKinect.Update();
-
+			kinect.Update();
 
 			if(myKinect.i_state == M_STATE_SINGLE_BOXING){
 				b_startOrder = true;

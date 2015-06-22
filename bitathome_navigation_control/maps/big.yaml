@@ -1,6 +1,6 @@
 image: big.pgm
-resolution: 0.01
-origin: [-1.5, -9.5, 0]
+resolution: 0.02
+origin: [-50, -50, 0]
 occupied_thresh: 0.65
 free_thresh: 0.196 # Taken from the Willow Garage map in the turtlebot_navigation package
 negate: 0
