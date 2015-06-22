@@ -141,13 +141,9 @@ def Judge_reco():
     return Curve_data
 
 def Judge():
-<<<<<<< HEAD
-    global Curve_data, X, Y, Curvedata
-    Judge_reco()
-=======
     global Curve_data, X, Y, Curvedata, flag
->>>>>>> e9631bace3269488269da20073ce4aa6d7e4bc24
     Len = len(Curve_data)
+    Judge_reco()
     minx = 1000
     ans = -1
     if X == -1:
