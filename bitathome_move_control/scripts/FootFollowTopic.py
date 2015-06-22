@@ -7,6 +7,7 @@
 # History
 #   2015/05/16 20:09 : 创建文件 [曹帅毅]
 #   2015/05/20 13:55 : 更改文件 [曹帅毅 马俊邦]
+#   2015/06/22 10:13 : 更改文件 [曹帅毅 马俊邦]
 
 
 
@@ -20,6 +21,10 @@ def run(data):
     global scanData
     scanData = data.ranges
 
+def reco_run(reco_data):
+    global recoData
+    recoData = reco_data
+
 #点聚类    
 def Clustering():
     global scanData
@@ -29,6 +34,16 @@ def Clustering():
         Ck = []
         if len(scanData) == 0:
             continue
+
+        for i in range(len(scanData)):
+            if scanData[i] < 0.09:
+                if i == 0 or i == len(scanData) - 1:
+                    scanData[i] = 100000
+                elif scanData[i + 1] < 0.09:
+                    scanData[i] = scanData[i - 1]
+                else:
+                    scanData[i] = (scanData[i - 1] + scanData[i + 1]) / 2.0
+
         i = 0
         flag = 0
         #每次聚类的判断第一个点的标志位
@@ -100,8 +115,35 @@ def Curve():
 
     ##if len(Curve_data) > 0:
         ##print Curve_data
+def Judge_reco():
+    global recoData
+    global Curve_data
+    Len = len(recoData)
+    Reco_list = []
+    ans_reco = []
+    if Len == 0:
+        return None
+    for i in range(0, Len, 2):
+        Reco_list.append([recoData[i], recoData[i + 1]])
+
+    for i in range(Len/2):
+        compare = Reco_list[i]
+        for j in range(len(Curve_data)):
+            L_dis = math.sqrt((Curve_data[j][1] - compare[0]) ** 2 + (Curve_data[j][2] - compare[1]) ** 2)
+            if L_dis <= 0.2:
+                ans_reco.append(Curve_data[j])
+                break
+
+    if len(ans_reco) == 0:
+        return None
+
+    Curve_data = ans_reco
+
+    return Curve_data
+
 def Judge():
     global Curve_data, X, Y, Curvedata
+    Judge_reco()
     Len = len(Curve_data)
     minx = 1000
     ans = -1
@@ -146,6 +188,8 @@ if __name__ == "__main__":
     scanData = list()
     #激光数据 list()类型
     scan_pub = rospy.Subscriber("/scan", LaserScan, run)
+    #Kinect数据
+    reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
     #操作函数
     X = -1
     Y = None
