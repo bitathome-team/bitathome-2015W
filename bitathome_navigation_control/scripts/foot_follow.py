@@ -38,7 +38,7 @@ def run2(data):
             styleData = "goRight"
         else:
             styleData = "go"
-    speed = math.atan((data.X ** 2 + data.Y ** 2) ** 0.5) * 10
+    speed = math.atan((data.X ** 2 + data.Y ** 2) ** 0.5) * 10 - 5
 
 
 def follow_pub():
@@ -72,11 +72,11 @@ def follow_pub():
         if styleData == "stop":
             ser(0,0,0)
         elif styleData == "go":
-            ser(200*speed,0,0)
+            ser(100*speed,0,0)
         elif styleData == "goRight":
-            ser(200*speed,0,(0-67)*speed)
+            ser(100*speed,0,(0-67)*speed)
         elif styleData == "goLeft":
-            ser(200*speed,0,67*speed)
+            ser(100*speed,0,67*speed)
         elif styleData == "right":
             ser(0,0,0-100)
         elif styleData == "left":
