@@ -19,7 +19,7 @@ def run1(data):
 
 def sf_flag(sf_data):
     global start_follow
-    start_follow = sf_data
+    start_follow = sf_data.sff
 
 def run2(data):
     global styleData, speed
