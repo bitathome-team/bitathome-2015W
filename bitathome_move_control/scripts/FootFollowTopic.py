@@ -20,9 +20,17 @@ def run(data):
     global scanData
     scanData = data.ranges
     
+def sf_init():
+    flag = 0
+    X = -1
+    Y = None
+    Curvedata = -1
+    
 def sf_flag(sf_data):
     global start_follow
-    start_follow = sf_data
+    start_follow = sf_data.sff
+    if start_follow == 1:
+        sf_init();
 
 def reco_run(reco_data):
     global recoData
