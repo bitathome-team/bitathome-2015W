@@ -17,6 +17,9 @@ def run1(data):
     global scanData
     scanData = data.ranges
 
+def sf_flag(sf_data):
+    global start_follow
+    start_follow = sf_data
 
 def run2(data):
     global styleData, speed
@@ -40,11 +43,10 @@ def run2(data):
             styleData = "go"
     speed = math.atan((data.X ** 2 + data.Y ** 2) ** 0.5) * 10 - 5
 
-
 def follow_pub():
-    global scanData, styleData
+    global scanData, styleData, start_follow
     while not rospy.is_shutdown():
-        if scanData is None or styleData == "":
+        if scanData is None or styleData == "" or start_follow == 0:
             continue
         rospy.loginfo("%s" % styleData)
         i = 0
@@ -95,6 +97,7 @@ if __name__ == "__main__":
     speed = 0
     scan_pub = rospy.Subscriber("/scan", LaserScan, run1)
     point_pub = rospy.Subscriber("FootFollow_topic", FootFollow, run2)
+    start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
     follow_pub()
 
     rospy.spin()
