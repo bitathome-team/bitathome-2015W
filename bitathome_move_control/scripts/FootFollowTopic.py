@@ -19,6 +19,10 @@ from bitathome_move_control.msg import *
 def run(data):
     global scanData
     scanData = data.ranges
+    
+def sf_flag(sf_data):
+    global start_follow
+    start_follow = sf_data
 
 def reco_run(reco_data):
     global recoData
@@ -26,11 +30,13 @@ def reco_run(reco_data):
 
 #点聚类    
 def Clustering():
-    global scanData
+    global scanData, start_follow
     global Ck
     Ck = []
     while not rospy.is_shutdown():
         Ck = []
+        if start_follow == 0:
+            continue
         if len(scanData) == 0:
             continue
 
@@ -209,6 +215,7 @@ if __name__ == "__main__":
     scan_pub = rospy.Subscriber("/scan", LaserScan, run)
     #Kinect数据
     reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
+    start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
     #操作函数
     flag = 0
     X = -1
