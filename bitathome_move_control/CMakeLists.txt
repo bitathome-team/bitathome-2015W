@@ -49,6 +49,7 @@ add_message_files(
    FILES
    FootFollow.msg
    Recoginze.msg
+   sf.msg
 #   Message1.msg
 #   Message2.msg
 )

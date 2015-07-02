@@ -21,6 +21,7 @@ def run(data):
     scanData = data.ranges
     
 def sf_init():
+    global flag, X, Y, Curvedata
     flag = 0
     X = -1
     Y = None
@@ -30,69 +31,72 @@ def sf_flag(sf_data):
     global start_follow
     start_follow = sf_data.sff
     if start_follow == 1:
-        sf_init();
+        sf_init()
 
 def reco_run(reco_data):
     global recoData
     recoData = reco_data
 
-#点聚类    
-def Clustering():
-    global scanData, start_follow
-    global Ck
-    Ck = []
+def wait_start():
+    global start_follow
     while not rospy.is_shutdown():
-        Ck = []
-        if start_follow == 0:
-            continue
         if len(scanData) == 0:
             continue
+        if start_follow == 1:
+            Clustering()
+#点聚类    
+def Clustering():
+    global scanData
+    global Ck
+    Ck = []
+    scan = []
+    for i in range(len(scanData)):
+        if scanData[i] < 0.09:
+            if i == 0 or i == len(scanData) - 1:
+                scan.append(100000)
+            elif scanData[i + 1] < 0.09:
+                scan.append(scanData[i - 1])
+            else:
+                scan.append((scanData[i - 1] + scanData[i + 1]) / 2.0)
+        else:
+            scan.append(scanData[i])
 
-        for i in range(len(scanData)):
-            if scanData[i] < 0.09:
-                if i == 0 or i == len(scanData) - 1:
-                    scanData[i] = 100000
-                elif scanData[i + 1] < 0.09:
-                    scanData[i] = scanData[i - 1]
-                else:
-                    scanData[i] = (scanData[i - 1] + scanData[i + 1]) / 2.0
-
-        i = 0
-        flag = 0
-        #每次聚类的判断第一个点的标志位
-        cnt = 0
-        #聚类集合的总数
-        judge = 0
-        #判断的特征点
+    i = 0
+    flag = 0
+    #每次聚类的判断第一个点的标志位
+    cnt = 0
+    #聚类集合的总数
+    judge = 0
+    #判断的特征点
         
-        #聚类集合
-        for S_data in scanData:
-            if flag == 0:
+    #聚类集合
+    for S_data in scan:
+        if flag == 0:
+            Ck.append([])
+            flag = 1
+            Ck[cnt].append([S_data, i])
+            judge_x = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi)
+            judge_y = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi)
+            cnt += 1
+                
+        if flag == 1:
+            dx = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi) - judge_x
+            dy = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi) - judge_y
+            R = math.sqrt(dx * dx + dy * dy)
+            if R < 0.05:
+                #阈值
+                Ck[cnt - 1].append([S_data, i])
+                judge_x = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi)
+                judge_y = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi)
+            else :
                 Ck.append([])
-                flag = 1
                 Ck[cnt].append([S_data, i])
                 judge_x = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi)
                 judge_y = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi)
                 cnt += 1
-                
-            if flag == 1:
-                dx = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi) - judge_x
-                dy = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi) - judge_y
-                R = math.sqrt(dx * dx + dy * dy)
-                if R < 0.05:
-                    #阈值
-                    Ck[cnt - 1].append([S_data, i])
-                    judge_x = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi)
-                    judge_y = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi)
-                else :
-                    Ck.append([])
-                    Ck[cnt].append([S_data, i])
-                    judge_x = S_data * math.cos((i * 0.5 - 135) / 180 * math.pi)
-                    judge_y = S_data * math.sin((i * 0.5 - 135) / 180 * math.pi)
-                    cnt += 1
-            i += 1
-        Curve()
-        Judge()
+        i += 1
+    Curve()
+    Judge()
 
 def Curve():
     global Ck
@@ -157,12 +161,12 @@ def Judge_reco():
 def Judge():
     global Curve_data, X, Y, Curvedata, flag
     Len = len(Curve_data)
-    Judge_reco()
+    #Judge_reco()
     minx = 1000
     ans = -1
     if X == -1:
         for i in range(0, Len - 1):
-            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 1.0:
+            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 1.0 and Curve_data[i][2] > -1.0 and Curve_data[i][2] < 1.0:
                 if minx > abs(Curve_data[i][2]):
                     ans = i
                     minx = Curve_data[i][2]
@@ -174,7 +178,7 @@ def Judge():
 
     elif X == -2:
         for i in range(0, Len - 1):
-            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 2.0:
+            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 2.0 and Curve_data[i][2] > -1.5 and Curve_data[i][2] < 1.5:
                 if minx > abs(Curve_data[i][2]):
                     ans = i
                     minx = Curve_data[i][2]
@@ -205,7 +209,6 @@ def Judge():
 
     print X
     print Y
-    print Curvedata
     print "over"
     pub.publish(X, Y)
 
@@ -218,11 +221,13 @@ if __name__ == "__main__":
     #发布话题
     ser = rospy.ServiceProxy("/hc_motor_cmd/vector_speed", VectorSpeed)
     #电机驱动
-    scanData = list()
+    scanData = []
+    recoData = []
+    start_follow = 0
     #激光数据 list()类型
     scan_pub = rospy.Subscriber("/scan", LaserScan, run)
     #Kinect数据
-    reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
+    #reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
     start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
     #操作函数
     flag = 0
@@ -230,6 +235,6 @@ if __name__ == "__main__":
     Y = None
     Curvedata = -1
     #腿部数据中心点
-    Clustering()
+    wait_start()
     
     rospy.spin()

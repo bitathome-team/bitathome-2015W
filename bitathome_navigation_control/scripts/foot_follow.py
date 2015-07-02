@@ -47,6 +47,7 @@ def follow_pub():
     global scanData, styleData, start_follow
     while not rospy.is_shutdown():
         if scanData is None or styleData == "" or start_follow == 0:
+            ser(0, 0, 0)
             continue
         rospy.loginfo("%s" % styleData)
         i = 0
@@ -80,11 +81,12 @@ def follow_pub():
         elif styleData == "goLeft":
             ser(100*speed,0,67*speed)
         elif styleData == "right":
-            ser(0,0,0-100)
+            ser(0,0,(0-133)*speed)
         elif styleData == "left":
-            ser(0,0,100)
+            ser(0,0,133*speed)
         elif styleData == "back":
             ser(-200,0,0)
+        print speed
         rospy.sleep(0.1)
 
 
