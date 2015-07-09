@@ -5,10 +5,19 @@
   <!-- 打开sick 定义base和laser的tf -->
   <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
 
-  <node name="follow_point" pkg="bitathome_move_control" type="FootFollowTopic.py" output="screen" />
+  <!-- 启动激光定位,提供码盘数据 -->
+  <node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" >
+    <param name="fixed_frame" value="odom" />
+  </node>
+
+  <node name="follow_point" pkg="bitathome_move_control" type="FootFollowTopic.py" />
+
   <!-- 打开底座控制 输出串口打开关闭信息 -->
   <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
 
   <node pkg="bitathome_navigation_control" name="follow_cmd" type="foot_follow.py" output="screen" />
 
+  <!-- 打开手柄控制 -->
+  <node pkg="joy" name="joy_node" type="joy_node" />
+  <node name="joy_start_follow" pkg="bitathome_move_control" type="joy_start_follow.py" output="screen" />
 </launch>
