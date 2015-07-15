@@ -7,6 +7,7 @@
 # History
 #   2014/11/16 21:44 : 创建文件 [刘达远]
 #   2015/2/27 14:00 : 修改文件 [刘达远] : 将电机驱动参数修改成移动速度
+#   2015/07/09 20:13 : 修改文件 [马俊邦] : 将电机速度限制增大,但电机速度超过限制时,将它调整为原来的4/5
 
 
 import rospy
@@ -17,7 +18,7 @@ import math
 
 node_name = "hc_motor_cmd"  # 节点名称
 serial_name = "/dev/ttyUSB0"  # 串口名称
-max_wheel_speed = 2000  # 最大电机转速
+max_wheel_speed = 4000  # 最大电机转速
 
 
 def run():
@@ -80,7 +81,9 @@ def handler_vector(data):
 
     if math.fabs(sv1) > max_wheel_speed or math.fabs(sv2) > max_wheel_speed or math.fabs(sv3) > max_wheel_speed:
         rospy.loginfo("You fly too low!!! ⊙_⊙")
-        return False
+        sv1 = sv1 * 5 / 4
+        sv2 = sv2 * 5 / 4
+        sv3 = sv3 * 5 / 4
 
     buf.extend(split_hl(sv1))
     buf.extend(split_hl(sv2))

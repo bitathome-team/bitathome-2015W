@@ -1,5 +1,0 @@
-<launch>
-  <node name="follow_point" pkg="bitathome_move_control" type="FootFollowTopic.py"  />
-
-  <node pkg="bitathome_navigation_control" name="follow_cmd" type="foot_follow.py"  />
-</launch>
