@@ -6,6 +6,7 @@ project(bitathome_navigation_control)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   rospy
+  roscpp
   std_msgs
   message_generation
   tf
@@ -49,6 +50,11 @@ add_message_files(
   FILES
   MovePoint.msg
   MyPoint.msg
+  MyMap.msg
+  Arr.msg
+  order.msg
+  person.msg
+  sf.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -82,7 +88,7 @@ generate_messages(
 catkin_package(
 #  INCLUDE_DIRS include
 #  LIBRARIES bitathome_navigation_control
-#  CATKIN_DEPENDS other_catkin_pkg
+  CATKIN_DEPENDS roscpp rospy std_msgs tf message_runtime
 #  DEPENDS system_lib
 )
 
@@ -92,7 +98,9 @@ catkin_package(
 
 ## Specify additional locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
 
 ## Declare a cpp library
 # add_library(bitathome_navigation_control
@@ -100,16 +108,16 @@ catkin_package(
 # )
 
 ## Declare a cpp executable
-# add_executable(bitathome_navigation_control_node src/bitathome_navigation_control_node.cpp)
+add_executable(my_get_path src/my_get_path.cpp)
+add_executable(joy_tf_control src/joy_tf_control.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
 # add_dependencies(bitathome_navigation_control_node bitathome_navigation_control_generate_messages_cpp)
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(bitathome_navigation_control_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(my_get_path ${catkin_LIBRARIES} )
+target_link_libraries(joy_tf_control ${catkin_LIBRARIES})
 
 #############
 ## Install ##

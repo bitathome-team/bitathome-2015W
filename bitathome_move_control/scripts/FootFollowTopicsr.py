@@ -9,7 +9,6 @@
 #   2015/05/20 13:55 : 更改文件 [曹帅毅 马俊邦]
 #   2015/06/22 10:13 : 更改文件 [曹帅毅 马俊邦]
 #   2015/07/08 09:13 : 更改文件 [曹帅毅 马俊邦]
-#   2015/07/09 20:16 : 加入丢失时kinect找回条件 [曹帅毅 马俊邦]
 
 
 
@@ -17,10 +16,7 @@ import rospy, math
 from bitathome_hardware_control.srv import *
 from sensor_msgs.msg import LaserScan
 from bitathome_move_control.msg import *
-from bitathome_navigation_control.msg import sf
 from tf.msg import tfMessage
-from tf.transformations import euler_from_quaternion    # tf角度、四元数转换
-
 def run(data):
     global scanData
     scanData = data.ranges
@@ -28,7 +24,7 @@ def run(data):
 def sf_init():
     global flag, X, Y, Curvedata
     flag = 0
-    X = -1
+    X = -100
     Y = -100
     Curvedata = -1
     
@@ -40,35 +36,21 @@ def sf_flag(sf_data):
 
 def reco_run(reco_data):
     global recoData
-    recoData = reco_data.reco
+    recoData = reco_data
 
 #获得机器的世界坐标
 def changeTf(data):
-    global tf_x, tf_y, tf_curve
+    global tf_x, tf_y
     if data.transforms[0].child_frame_id == "base_link":
         tf_x = data.transforms[0].transform.translation.x
         tf_y = data.transforms[0].transform.translation.y
-        quaternion = (data.transforms[0].transform.rotation.x, data.transforms[0].transform.rotation.y, data.transforms[0].transform.rotation.z, data.transforms[0].transform.rotation.w)
-        z = euler_from_quaternion(quaternion, axes='sxyz')
-        tf_curve = z[2]
 
 def wait_start():
     global start_follow
     while not rospy.is_shutdown():
         if len(scanData) == 0:
             continue
-        if start_follow == 1:
-            Clustering()
-def calculate_curve(x, y):
-    if x > 0.01:
-        ang = math.atan(y/x)
-    elif x < 0.01 and y < 0:
-        ang = -(math.pi - math.atan(y / x))
-    elif x < 0.01 and y > 0:
-        ang = math.pi + math.atan(y / x)
-    else:
-        ang = 0
-    return ang
+        Clustering()
 #点聚类    
 def Clustering():
     global scanData
@@ -149,16 +131,13 @@ def Curve():
         #curve1 = Lk / abs(Ck_first_y - Ck_last_y)
         xc = 0
         yc = 0
-        # 过滤机械臂
         if curve > 1.0 and Lk > 0.1 and Lk < 0.5:
             for k in range(0, length - 1):
                 xc += Ck[i][k][0] * math.cos(math.radians(Ck[i][k][1] * 0.5 - 135))
                 yc += Ck[i][k][0] * math.sin(math.radians(Ck[i][k][1] * 0.5 - 135))
             xc /= length
             yc /= length
-            if -0.3 < xc < 0 and -0.3 < yc < 0.3:
-                continue
-            else:
+            if 0.5 < math.sqrt(xc ** 2 + yc ** 2) < 1.5:
                 Curve_data.append([curve, xc, yc])
             #Curve_data1.append([curve, curve1,xc, yc])
         #print Curve_data
@@ -172,33 +151,33 @@ def Judge_reco():
     Reco_list = []
     ans_reco = []
     if Len == 0:
-        Curve_data = []
         return None
-    for i in range(0, Len):
-        Reco_list.append(recoData[i])
+    for i in range(0, Len, 2):
+        Reco_list.append([recoData[i], recoData[i + 1]])
 
-    for i in range(Len):
+    for i in range(Len/2):
         compare = Reco_list[i]
         for j in range(len(Curve_data)):
-            curve = calculate_curve(Curve_data[j][1], Curve_data[j][2])
-            print "curve:%f" % curve
-            if math.fabs(curve - compare) < math.radians(5):
+            L_dis = math.sqrt((Curve_data[j][1] - compare[0]) ** 2 + (Curve_data[j][2] - compare[1]) ** 2)
+            if L_dis <= 0.2:
                 ans_reco.append(Curve_data[j])
+                break
 
     if len(ans_reco) == 0:
-        Curve_data = []
         return None
+
     Curve_data = ans_reco
+
     return Curve_data
 
 def Judge():
-    global Curve_data, X, Y, Curvedata, flag, tf_x, tf_y, x_old, y_old, tf_curve
+    global Curve_data, X, Y, Curvedata, flag, tf_x, tf_y, x_old, y_old
     #记录丢失前的世界坐标
     Len = len(Curve_data)
     #Judge_reco()
     minx = 1000
     ans = -1
-    if X == -1:
+    if X == -100:
         for i in range(0, Len - 1):
             if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 1.0 and Curve_data[i][2] > -1.0 and Curve_data[i][2] < 1.0:
                 if minx > math.fabs(Curve_data[i][2]):
@@ -210,23 +189,6 @@ def Judge():
             Y = Curve_data[ans][2]
             Curvedata = Curve_data[ans][0]
 
-    elif X == -2:
-        #Judge_reco()
-        #Len = len(Curve_data)
-        for i in range(0, Len):
-            th_tar = tf_curve + calculate_curve(Curve_data[i][1], Curve_data[i][2])
-            x_tar = tf_x + math.sqrt(Curve_data[i][1] ** 2 + Curve_data[i][2] ** 2) * math.cos(th_tar)
-            y_tar = tf_y + math.sqrt(Curve_data[i][1] ** 2 + Curve_data[i][2] ** 2) * math.sin(th_tar)
-            dis = (x_tar - x_old) ** 2 + (y_tar - y_old) ** 2
-            if minx > dis:
-                ans = i
-                minx = dis
-        minx = 1000
-        if Len > 0.1 and ans > -1:
-            flag = 0
-            X = Curve_data[ans][1]
-            Y = Curve_data[ans][2]
-            Curvedata = Curve_data[ans][0]
     else:
         for i in range(0, Len - 1):
             L_dis = math.sqrt((Curve_data[i][1] - X) ** 2 + (Curve_data[i][2] - Y) ** 2)
@@ -241,40 +203,12 @@ def Judge():
         else:
             flag += 1
             if flag > 100:
-                th_old = tf_curve + calculate_curve(X, Y)
-                x_old = tf_x + math.sqrt(X ** 2 + Y ** 2) * math.cos(th_old)
-                y_old = tf_y + math.sqrt(X ** 2 + Y ** 2) * math.sin(th_old)
-                X = -2
+                x_old = tf_x + X
+                y_old = tf_y + Y
+                X = -100
                 Y = -100
                 Curvedata = None
-
-    if X == -2:
-        print "x_old: %f" % x_old
-        print "y_old: %f" % y_old
-        print "tf_x: %f" % tf_x
-        print "tf_y: %f" % tf_y
-        print x_old - tf_x
-        print y_old - tf_y
-        print Curvedata
-        print "lost"
-        '''
-        curve = calculate_curve(x_old - tf_x, y_old - tf_y)
-        print "curve:%f" % curve
-        '''
-        pub.publish(x_old - tf_x, y_old - tf_y)
-    else:
-
-        print "tf_x:%f" % tf_x
-        print "tf_y:%f" % tf_y
-        print "X:%f" % X
-        print "Y:%f" % Y
-        print Curvedata
-        print "over"
-        '''
-        curve = calculate_curve(X, Y)
-        print "curve:%f" % curve
-        '''
-        pub.publish(X, Y)
+    pub.publish(X, Y)
 
 
 
@@ -292,21 +226,19 @@ if __name__ == "__main__":
     #激光数据 list()类型
     scan_pub = rospy.Subscriber("/scan", LaserScan, run)
     #Kinect数据
-    # reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
-    start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
+    #reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
+    #start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
     #操作函数
     flag = 0
-    X = -1
+    X = -100
     Y = -100
     Curvedata = -1
     #获得机器的世界坐标
     tf = rospy.Subscriber("/tf", tfMessage, changeTf)
     tf_x = 0
     tf_y = 0
-    tf_curve = 0
     x_old = 0
     y_old = 0
-    Curve_data = []
     #腿部数据中心点
     wait_start()
     

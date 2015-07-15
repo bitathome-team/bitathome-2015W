@@ -1,0 +1,5 @@
+<launch>
+  <include file = "$(find bitathome_navigation_control)/launch/my_move_base.launch" />
+  <include file = "$(find bitathome_navigation_control)/launch/foot_follow.launch" />
+  <include file = "$(find bitathome_navigation_control)/launch/navigation_test.launch" />
+</launch>

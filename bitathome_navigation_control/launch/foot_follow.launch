@@ -1,14 +1,5 @@
 <launch>
+  <node name="follow_point" pkg="bitathome_move_control" type="FootFollowTopic.py"  />
 
-  <param name="use_sim_time" value="false" />
-
-  <!-- 打开sick 定义base和laser的tf -->
-  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
-
-  <node name="follow_point" pkg="bitathome_move_control" type="FootFollowTopic.py" output="screen" />
-  <!-- 打开底座控制 输出串口打开关闭信息 -->
-  <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
-
-  <node pkg="bitathome_navigation_control" name="follow_cmd" type="foot_follow.py" output="screen" />
-
+  <node pkg="bitathome_navigation_control" name="follow_cmd" type="foot_follow.py"  />
 </launch>

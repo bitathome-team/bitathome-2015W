@@ -1,0 +1,6 @@
+<launch>
+  <!-- 打开语音节点 输出所说内容 -->
+  <node name="order_Publisher" pkg="bitathome_navigation_control" type="listen_order.py"/>
+  <node name="person_position_Publisher" pkg="bitathome_navigation_control" type="person_position.py"/>
+  <node name="navigation_test" pkg="bitathome_navigation_control" type="navigation_test.py" output="screen" />
+</launch>

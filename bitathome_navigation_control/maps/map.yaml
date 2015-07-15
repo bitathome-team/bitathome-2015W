@@ -1,4 +1,4 @@
-image: /home/ldy/bitathome/src/bitathome_navigation_control/maps/mjb.pgm
+image: map.pgm
 resolution: 0.025000
 origin: [-12.812499, -12.812499, 0.000000]
 negate: 0

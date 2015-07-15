@@ -1,0 +1,19 @@
+<launch>
+
+  <param name="use_sim_time" value="false" />
+
+  <!-- 打开sick 定义base和laser的tf -->
+  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
+
+  <!-- 打开底座控制 输出串口打开关闭信息 -->
+  <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
+
+  <!-- 打开语音节点 输出所说内容 -->
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" />
+  <node name="AudioPlay" pkg="bitathome_remote_control" type="AudioPlay.py" output="screen" />
+
+  <node name="ldy_speak_node" pkg="bitathome_remote_control" type="ldy_speak_node.py" output="screen" />
+  <node name="ldy_speak_foot" pkg="bitathome_move_control" type="FootFollowTopicsr.py" output="screen" />
+  <node name="ldy_speak" pkg="bitathome_navigation_control" type="ldy_speak.py" output="screen" />
+
+</launch>

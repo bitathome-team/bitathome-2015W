@@ -7,21 +7,25 @@
 # Description : 根据给定的目标点，进行移动
 # History
 #   2015/05/18 14:17 : 创建文件 [刘达远]
+#   2015/07/05 18:12 : 修改文件 [刘达远] : 更改获取世界坐标方式
 
 
 import rospy, math, time
 from bitathome_hardware_control.srv import VectorSpeed  # 电机
 from bitathome_remote_control.srv import say            # 语音（说）
-from bitathome_navigation_control.msg import MyPoint    # 目标点信息
-from move_base_msgs.msg import MoveBaseActionFeedback   # 机器当前位置
+from bitathome_navigation_control.msg import MyPoint, Arr, sf    # 目标点信息
+from tf.msg import tfMessage   # 机器当前位置
 from sensor_msgs.msg import LaserScan                   # 激光数据
 from tf.transformations import euler_from_quaternion    # tf角度、四元数转换
 from geometry_msgs.msg import Pose                      # 坐标点
+from nav_msgs.msg import OccupancyGrid
 
 
 def update_feedbackData(data):
     global feedbackData
-    feedbackData = data.feedback.base_position.pose
+    feedbackData.position.x = data.position.x
+    feedbackData.position.y = data.position.y
+    feedbackData.orientation = data.orientation
 
 
 def update_scanData(data):
@@ -30,90 +34,137 @@ def update_scanData(data):
 
 
 def update_goalPointData(data):
-    global goalPointData, say_key
+    global goalPointData, say_key, goalSize
+    goalSize = 0.01
     goalPointData = data
     say_key = True
 
 
+def updata_mapData(data):
+    global mapData, pointSize, width, height, Startx, Starty
+    if data.header.frame_id == "map":
+        pointSize = data.info.resolution
+        width = data.info.width
+        height = data.info.height
+        Startx = int(round(data.info.origin.position.x / pointSize + width))
+        Starty = int(round(data.info.origin.position.y / pointSize + height))
+        mapData = data.data[:]
+
+
+def updata_moveKey(data):
+    global moveKey
+    moveKey = data.sff
+
 def my_move_base():
-    global feedbackData, scanData, goalPointData, say_key
+    global feedbackData, scanData, goalPointData, say_key, goalSize, mapData, pointSize, width, height, Startx, Starty, moveKey
     while not rospy.is_shutdown():
-        if feedbackData == Pose() or scanData == [] or goalPointData == MyPoint():
+        if feedbackData == Pose() or scanData == [] or goalPointData == MyPoint() or mapData == [] or moveKey is not 0:
             continue
 
-        if (feedbackData.position.x - goalPointData.x) ** 2 + (feedbackData.position.y - goalPointData.y) ** 2 < 0.01:
+        continueKey = True
+        # 如果已经走到目标点, 调整朝向
+        if (feedbackData.position.x - goalPointData.x) ** 2 + (feedbackData.position.y - goalPointData.y) ** 2 < goalSize:
+            goalSize = 0.25
             quaternion = (feedbackData.orientation.x, feedbackData.orientation.y, feedbackData.orientation.z, feedbackData.orientation.w)
             z = euler_from_quaternion(quaternion, axes='sxyz')
             theta = z[2] - goalPointData.z
 
-            if theta < 0 - 0.27:
-                if theta < 0 - 0.1:
-                    motor_ser(0, 0, 176)
-                else:
-                    motor_ser(0, 0, 88)
-            elif theta > 0.27:
-                if theta > 0.1:
-                    motor_ser(0, 0, 0 - 176)
-                else:
-                    motor_ser(0, 0, 0 - 88)
+            #print theta
+            speed = theta * 1000
+            if speed < 0:
+                speed = max(speed, -333)
+            else:
+                speed = min(speed, 333)
+            if theta < 0 - 0.10:
+                motor_ser(0, 0, 0-speed)
+            elif theta > 0.10:
+                motor_ser(0, 0, 0-speed)
             elif say_key:
                 motor_ser(0, 0, 0)
                 say_ser(goalPointData.say)
+                arrive_pub.publish(1)
                 say_key = False
             else:
                 motor_ser(0, 0, 0)
+            continueKey = False
             continue
 
-        nowx = goalPointData.x - feedbackData.position.x
-        nowy = goalPointData.y - feedbackData.position.y
-        theta = 0
-        if math.fabs(nowx) < 0.01:
-            if nowy < 0:
-                theta = 0 - math.pi / 2
+        if continueKey:
+            # 更新目标点的相对坐标
+            nowx = goalPointData.x - feedbackData.position.x
+            nowy = goalPointData.y - feedbackData.position.y
+            theta = 0
+            if math.fabs(nowx) < 0.01:
+                if nowy < 0:
+                    theta = 0 - math.pi / 2
+                else:
+                    theta = math.pi / 2
+            elif nowx > 0:
+                theta = math.atan(nowy / nowx)
             else:
-                theta = math.pi / 2
-        elif nowx > 0:
-            theta = math.atan(nowy / nowx)
-        else:
-            if nowy > 0:
-                theta = math.atan(nowy / nowx) + math.pi
-            else:
-                theta = math.atan(nowy / nowx) - math.pi
-        
-        quaternion = (feedbackData.orientation.x, feedbackData.orientation.y, feedbackData.orientation.z, feedbackData.orientation.w)
-        z = euler_from_quaternion(quaternion, axes='sxyz')
-        theta = z[2] - theta
-
-        rospy.loginfo("find")
-        print theta * 180 / math.pi
-        if theta < 0 - 0.27:
-            if theta < 0 - 0.1:
-                motor_ser(0, 0, 176)
-            else:
-                motor_ser(0, 0, 88)
-        elif theta > 0.27:
-            if theta > 0.1:
-                motor_ser(0, 0, 0 - 176)
-            else:
-                motor_ser(0, 0, 0 - 88)
-        else:
-            i = 0
-            flag = False
-            for it in scanData:
-                if it < 0.30 and it > 0.09:
-                    flag = True
-                    if i < 270:
-                       motor_ser(0, 150, (i - 270) / 2)
-                    else:
-                       motor_ser(0, 0 - 150, (i - 270) / 2)
-                i += 1
+                if nowy > 0:
+                    theta = math.atan(nowy / nowx) + math.pi
+                else:
+                    theta = math.atan(nowy / nowx) - math.pi
             
-            if flag:
-                continue
-
-            motor_ser(333, 0, 0)
-        rospy.sleep(0.1)            
-                       
+            quaternion = (feedbackData.orientation.x, feedbackData.orientation.y, feedbackData.orientation.z, feedbackData.orientation.w)
+            z = euler_from_quaternion(quaternion, axes='sxyz')
+            theta = theta - z[2]
+    
+            # 调整朝向为目标点方向
+            # print theta
+            speed = theta * 1000
+            if speed < 0:
+                speed = max(speed, -333)
+            else:
+                speed = min(speed, 333)
+            if theta < 0 - 0.05:
+                motor_ser(500, 0, speed)
+                print speed
+            elif theta > 0.03:
+                motor_ser(500, 0, speed)
+                print speed
+            else:
+                flag = True
+                while flag:
+                    i = 0
+                    flag = False
+                    nowx = goalPointData.x - feedbackData.position.x
+                    nowy = goalPointData.y - feedbackData.position.y
+                    Nowx = Startx + int(feedbackData.orientation.x / pointSize)
+                    Nowy = Starty + int(feedbackData.orientation.y / pointSize)
+                    for it in scanData:
+                        if 140 < i < 400:
+                            if 0.09 < it < 0.3 and mapData[int(Nowy + it * math.sin((i - 270) * 0.00999999977648 + z[2]) * width / pointSize) + int(Nowx + it * math.cos((i-270) * 0.00999999977648 + z[2]) / pointSize)] != 100:
+                                print mapData[int(Nowy + it * math.cos((i - 270) * 0.00999999977648)) * width + int(Nowx + it * math.sin((i-270) * 0.00999999977648))], it, i
+                                flag = True
+                                if nowy > 0:
+                                    motor_ser(0, 250, speed / 2)
+                                else:
+                                    motor_ser(0, 0 - 250, speed / 2)
+                                break
+                            elif 0.09 < it < 0.20:
+                                flag = True
+                                if nowy > 0:
+                                    motor_ser(0, 250, speed / 2)
+                                else:
+                                    motor_ser(0, 0 - 250, speed / 2)
+                                break
+                        elif 90 < i < 140:
+                            if 0.09 < it < 0.35:
+                                flag = True
+                                motor_ser(250, 250, speed / 2)
+                                break
+                        elif 400 < i < 450:
+                            if 0.09 < it < 0.35:
+                                flag = True
+                                motor_ser(250, 0 - 250, speed / 2)
+                                break
+                        i += 1
+    
+                motor_ser(500, 0, 0)
+            rospy.sleep(0.05)            
+                           
 
 if __name__ == "__main__":
     rospy.init_node("my_move_base")
@@ -124,10 +175,17 @@ if __name__ == "__main__":
     feedbackData = Pose()
     scanData = list()
     goalPointData = MyPoint()
+    goalSize = 0.01
+    mapData = []
+    moveKey = 0
     
-    move_base_feedback_pub = rospy.Subscriber("/move_base/feedback", MoveBaseActionFeedback, update_feedbackData)
+    arrive_pub = rospy.Publisher("/arrive", Arr, queue_size=10)
+
+    map_pub = rospy.Subscriber("/map_map", OccupancyGrid, updata_mapData)
+    move_base_feedback_pub = rospy.Subscriber("/goalCoords", Pose, update_feedbackData)
     scan_pub = rospy.Subscriber("/scan", LaserScan, update_scanData)
     goalPoint_pub = rospy.Subscriber("/my_move_base/goalPoint", MyPoint, update_goalPointData)
+    moveKey_pub = rospy.Subscriber("/StartFollow", sf, update_moveKey)
     
     my_move_base()
 
