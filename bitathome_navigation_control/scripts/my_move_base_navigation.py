@@ -57,7 +57,6 @@ def update_moveKey(data):
 
 def my_move_base():
     global feedbackData, scanData, goalPointData, say_key, goalSize, mapData, pointSize, width, height, Startx, Starty, moveKey
-    say_ser("I'm OK!")
     while not rospy.is_shutdown():
         if feedbackData == Pose() or scanData == [] or goalPointData == MyPoint() or mapData == [] or moveKey is not 0:
             continue
@@ -71,7 +70,7 @@ def my_move_base():
             if z[2] > math.pi:
                 z[2] %= math.pi
                 z[2] -= 2 * math.pi
-            elif theta < 0 - math.pi:
+            elif z[2] < 0 - math.pi:
                 z[2] %= math.pi
                 z[2] += 2 * math.pi
             #print z[2], goalPointData.z
@@ -95,8 +94,9 @@ def my_move_base():
                 motor_ser(0, 0, 0-speed)
             elif say_key:
                 motor_ser(0, 0, 0)
-                say_ser(goalPointData.say)
-                arrive_pub.publish(1)
+                if goalPointData.say != "":
+                    say_ser(goalPointData.say)
+                    arrive_pub.publish(1)
                 say_key = False
             else:
                 motor_ser(0, 0, 0)
@@ -135,9 +135,9 @@ def my_move_base():
             #print theta
             speed = theta * 1000
             if speed < 0:
-                speed = max(speed, -333)
+                speed = max(speed, -500)
             else:
-                speed = min(speed, 333)
+                speed = min(speed, 500)
             if True:
                 flag = True
                 while flag:
@@ -153,16 +153,16 @@ def my_move_base():
                                 #print mapData[int(Nowy + it * math.cos((i - 270) * 0.00999999977648)) * width + int(Nowx + it * math.sin((i-270) * 0.00999999977648))], it, i
                                 flag = True
                                 if i < 270:
-                                    motor_ser(0, 250, 0)
+                                    motor_ser(0, 250, speed / 2)
                                 else:
-                                    motor_ser(0, 0 - 250, 0)
+                                    motor_ser(0, 0 - 250, speed / 2)
                                 break
                             elif 0.09 < it < 0.30:
                                 flag = True
                                 if nowy > 0:
-                                    motor_ser(0, 250, 0)
+                                    motor_ser(0, 250, speed / 2)
                                 else:
-                                    motor_ser(0, 0 - 250, 0)
+                                    motor_ser(0, 0 - 250, speed / 2)
                                 break
                         elif 90 < i < 220:
                             if 0.09 < it < 0.35:
@@ -177,10 +177,10 @@ def my_move_base():
                         i += 1
     
 		if theta < 0 - 0.05:
-                	motor_ser(500, 0, speed)
+                	motor_ser(250, 0, speed)
                	 	#print speed
             	elif theta > 0.03:
-                	motor_ser(500, 0, speed)
+                	motor_ser(250, 0, speed)
                 	#print speed
                 else:
 			motor_ser(500, 0, 0)

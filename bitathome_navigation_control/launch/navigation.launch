@@ -1,5 +1,6 @@
 <launch>
   <include file = "$(find bitathome_navigation_control)/launch/my_move_base_navigation.launch" />
   <include file = "$(find bitathome_navigation_control)/launch/foot_follow.launch" />
-  <include file = "$(find bitathome_navigation_control)/launch/navigation_test.launch" />
+  <node name="order_Publisher" pkg="bitathome_navigation_control" type="listen_order.py"/>
+  <node name="navigation_start" pkg="bitathome_navigation_control" type="navigation.py"/>
 </launch>

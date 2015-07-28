@@ -13,8 +13,10 @@
 #include <bitathome_navigation_control/MyPoint.h>
 #include <bitathome_navigation_control/MyMap.h>
 #include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/OccupancyGrid.h>
 #include <sensor_msgs/LaserScan.h>
+#include <nav_msgs/Path.h>
 #include <math.h>
 #include <queue>
 #include <string>
@@ -22,6 +24,7 @@
 #include <time.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <algorithm>
 
 class tpoint {
    public:
@@ -39,9 +42,9 @@ tpoint Now, Start, Goal;
 int mapDataInit[1024*1024+100];
 float pointSize = 0;
 bool getKey = false, goalKey = true, feedbackKey = true, mapKey = true;
-int width, height, nowPoint = 0;
+int width, height, nowPoint = 0, styleKey;
 std::vector<tpoint> PATH;
-ros::Publisher goalPoint_pub, mapShow_pub, goalCoords_pub;
+ros::Publisher goalPoint_pub, mapShow_pub, goalCoords_pub, path_pub;
 double mapEuler;
 
 int getPath() {
@@ -71,14 +74,23 @@ int getPath() {
     tf::Matrix3x3 m(qq);
     m.getRPY(z[0], z[1], z[2]);
     double x, y;
-    ROS_INFO("%d %d", Start.x, Start.y);
-    for (int i = 90; i < 450; i ++) {
+    //ROS_INFO("%d %d", Start.x, Start.y);
+    //print styleKey
+    printf("test1");
+    for (int i = 180; i < 360; i ++) {
         x = laserData.position.x + scanData[i] * cos((i - 270) * 0.00999999977648 + z[2]);
         y = laserData.position.y + scanData[i] * sin((i - 270) * 0.00999999977648 + z[2]);
-        if (i == 270) ROS_INFO("%f %f %f %f", laserData.position.x, laserData.position.y, x, y);
-        for (int ii = int(y / pointSize) + Start.y - 3; ii < int(y / pointSize) + Start.y + 3; ii ++) {
-            for (int jj = int(x / pointSize) + Start.x - 3; jj < int(x / pointSize) + Start.x + 3; jj ++) {
-                mapData[ii * width + jj] = 100;
+        //if (i == 270) ROS_INFO("%f %f %f %f", laserData.position.x, laserData.position.y, x, y);
+        for (int ii = std::max(int(y / pointSize) + Start.y - 3, 10); ii < int(y / pointSize) + Start.y + 3 && ii < height - 10; ii ++) {
+            for (int jj = std::max(int(x / pointSize) + Start.x - 3, 10); jj < int(x / pointSize) + Start.x + 3 && jj < width - 10; jj ++) {
+                //printf ("%d\n", styleKey);
+                if (ii * width + jj >= width * height) continue;
+                if (styleKey == 1) {
+                    mapData[ii * width + jj] = 100;
+                    mapDataInit[ii * width + jj] = 100;
+                } else {
+                    mapData[ii * width + jj] = 100;
+                }
             }
         }
     }*/
@@ -116,9 +128,22 @@ int getPath() {
             //printf("path len is %d\n", path.size());
             int next = -1;
             int nextx = 0, nexty = 0;
+            nav_msgs::Path path_rep;
+            path_rep.header.stamp = ros::Time::now();
+            path_rep.header.frame_id = "map";
+
             while (!path.empty()) {
                 temp = path.front();
                 path.pop();
+
+                geometry_msgs::PoseStamped pose_temp;
+                pose_temp.header.stamp = ros::Time::now();
+                pose_temp.header.frame_id = "map";
+                pose_temp.pose.position.x = (temp.x - Start.x) * pointSize;
+                pose_temp.pose.position.y = (temp.y - Start.y) * pointSize;
+                pose_temp.pose.orientation.w = 1;
+                path_rep.poses.push_back(pose_temp);
+
                 if (temp.ddir != next && ((temp.x - nextx) * (temp.x - nextx) + (temp.y - nexty) * (temp.y - nexty)) > 25) {
                     PATH.push_back(temp);
                     next = temp.ddir;
@@ -143,6 +168,7 @@ int getPath() {
             }
 
             reverse(PATH.begin(),PATH.end());
+            path_pub.publish(path_rep);
             printf("PATH len is %d\n", (int)PATH.size());
             for (int i = 0; i < PATH.size(); i ++)
                 printf("路径点%d: %d %d %f\n",i , PATH[i].x, PATH[i].y, euler_angles[PATH[i].ddir]);
@@ -305,7 +331,7 @@ void *updata_feedbackData(void *junk){
             listener.lookupTransform("/map", "/laser", ros::Time(0), transform_laser);
         } catch (tf::TransformException ex){
             ROS_ERROR("wait %s",ex.what());
-            ros::Duration(5.0).sleep();
+            ros::Duration(1.0).sleep();
         }
         /*
         mapStart.position.x = transform_start.getOrigin().x();
@@ -355,6 +381,7 @@ void updata_goalData(const bitathome_navigation_control::MyPoint::ConstPtr& data
         Goal.y = Start.y + int(round(goalData.y / pointSize));
         goalKey = false;
         ROS_INFO("updata_goalData");
+        styleKey ++;
         while (getKey);
         getPath();
     }
@@ -416,6 +443,7 @@ int main(int argc, char **argv) {
 
     goalPoint_pub = n.advertise<bitathome_navigation_control::MyPoint>("/my_move_base/goalPoint", 1000);
     mapShow_pub = n.advertise<bitathome_navigation_control::MyMap>("/my_map_show", 1000);
+    path_pub = n.advertise<nav_msgs::Path>("/my_get_path/Path", 1000);
     goalCoords_pub = n.advertise<geometry_msgs::Pose>("/goalCoords", 1000);
 
     //ros::Subscriber feedback_pub = n.subscribe("/tf", 1000, updata_feedbackData);

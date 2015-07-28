@@ -21,9 +21,14 @@ def run(data):
     person_data = data.reco[:]
 
 def run1(data):
-    global flag
-    if data == 1:
+    global flag, run_flag, joyKey
+    joyKey = True
+    if data.data == 1:
         flag += 1
+        run_flag = 0
+        print flag
+        print run_flag
+    joyKey = False
 
 def run2(data):
     global buf
@@ -55,10 +60,13 @@ if __name__ == "__main__":
     say = ""
     action = []  # 动作集合
     buf = []
+    joyKey = False
     while not rospy.is_shutdown():
         if len(buf) == 0:
             continue
         try:
+            if joyKey:
+                continue
             #获取指令
             if buf[0] == "order" and flag == -1:
                 print "111"
@@ -88,6 +96,7 @@ if __name__ == "__main__":
                         print "go room"
                         if action[1] == "bedroom":
                             goal.publish(4.5, -4, 3.14, "", 0)
+                            joyKey = True
                     if buf[1] == "2":
                         #重新识别命令
                         flag = -1
@@ -111,6 +120,7 @@ if __name__ == "__main__":
                             print float(person_data[i]) / 1000.0
                             print float(person_data[i + 1]) / 1000.0
                             local.publish(float(person_data[i]) / 1000.0, float(person_data[i + 1]) / 1000.0, 0, "", 1.0)
+                            joyKey = True
                             flag = 3
                 elif action[2] == "normal":
                     follow.publish(0)
@@ -118,6 +128,7 @@ if __name__ == "__main__":
                     print float(person_data[i]) / 1000.0
                     print float(person_data[i + 1]) / 1000.0
                     local.publish(float(person_data[i]) / 1000.0, float(person_data[i + 1]) / 1000.0, 0, "", 1.0)
+                    joyKey = True
                     flag = 3
             # follow
             if flag == 4:

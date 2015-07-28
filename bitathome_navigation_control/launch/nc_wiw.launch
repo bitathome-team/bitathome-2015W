@@ -3,7 +3,7 @@
   <param name="use_sim_time" value="false" />
 
   <!-- 打开地图 -->
-  <node name="map_server" pkg="map_server" type="map_server" args="$(find bitathome_navigation_control)/maps/big.yaml" />
+  <node name="map_server" pkg="map_server" type="map_server" args="$(find bitathome_navigation_control)/maps/map.yaml" />
 
   <!-- 打开sick 定义base和laser的tf -->
   <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />

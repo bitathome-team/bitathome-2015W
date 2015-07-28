@@ -13,7 +13,7 @@
   <node name="AudioPlay" pkg="bitathome_remote_control" type="AudioPlay.py" output="screen" />
 
   <node name="ldy_speak_node" pkg="bitathome_remote_control" type="ldy_speak_node.py" output="screen" />
-  <node name="ldy_speak_foot" pkg="bitathome_move_control" type="FootFollowTopicsr.py" output="screen" />
+  <node name="ldy_speak_foot" pkg="bitathome_move_control" type="FootFollowTopicsr_start.py" output="screen" />
   <node name="ldy_speak" pkg="bitathome_navigation_control" type="ldy_speak.py" output="screen" />
 
 </launch>

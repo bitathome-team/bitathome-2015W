@@ -12,7 +12,6 @@
 import rospy, math
 from bitathome_hardware_control.srv import *
 from bitathome_move_control.msg import *
-from bitathome_navigation_control.msg import sf
 from sensor_msgs.msg import LaserScan
 
 
@@ -226,13 +225,10 @@ def find_dir(dis, r):
         '''
     return sectors
 
-
-
 def follow_pub():
-    global scanData, styleData, start_follow, ang
+    global scanData, styleData, start_follow, ang, speed, speed_ang, speed_old
     while not rospy.is_shutdown():
         if scanData is None or styleData == "" or start_follow == 0:
-           # ser(0, 0, 0)
             continue
         flag = False
         distance = []
@@ -261,13 +257,40 @@ def follow_pub():
             R -= 0.1
         #紧急避障
         for i in range(0, 90):
-            if dis[i] < 0.3 and (15 < i < 75):
-                ser(0, -math.cos((i * 3 - 135) / 180 * math.pi) * 300, 0)
+            if dis[i] < 0.35 and (15 < i < 45):
+                ser(0, 400, 0)
+                time = dis[14] / 2 / (0.7 / 2.5)
+                if time > 0.8:
+                    time = 0.8
+                rospy.sleep(time)
+                rospy.loginfo("front:%d" % i)
+                rospy.loginfo("vx:%f" % -math.sin(math.radians(i * 3 - 135)) * 500)
+                rospy.loginfo("vy:%f" % -math.cos(math.radians(i * 3 - 135)) * 500)
+                flag = True
+                speed_old = 0
+                break
+            if dis[i] < 0.4 and (45 < i < 75):
+                ser(0, -400, 0)
+                time = dis[74] / 2 / (0.7 / 2.5)
+                if time > 0.8:
+                    time = 0.8
+                rospy.sleep(time)
+                rospy.sleep(0.8)
+                rospy.loginfo("front:%d" % i)
+                rospy.loginfo( "vx:%f" % -math.sin(math.radians(i * 3 - 135)) * 500)
+                rospy.loginfo("vy:%f" % -math.cos(math.radians(i * 3 - 135)) * 500)
+                flag = True
+                speed_old = 0
+                break
+            '''
+            if dis[i] < 0.4 and (15 < i < 75):
+                ser(0, -math.cos((i * 3 - 135) / 180 * math.pi) * 500, 0)
                 rospy.loginfo ("front:%d" % i)
                 rospy.loginfo( "vx:%f" % -math.sin(math.radians(i * 3 - 135)) * 500)
                 rospy.loginfo ("vy:%f" % -math.cos(math.radians(i * 3 - 135)) * 500)
                 flag = True
                 break
+            '''
             '''
             elif dis[i] < 0.4 and (i < 13 or i > 77):
                 ser(-math.sin((i * 3 - 135) / 180 * math.pi) * 300, -math.cos((i * 3 - 135) / 180 * math.pi) * 300, 0)
@@ -298,20 +321,24 @@ def follow_pub():
                 if styleData == "goLeft" or styleData == "goRight" or styleData == "go":
                     styleData = "goaviod"
         print styleData
+        if math.fabs(speed - speed_old) > 2.0:
+            speed = speed_old + (speed - speed_old) / 100
+            speed_old = speed
+            ang = ang / 10
         if styleData == "stop":
             ser(0, 0, 0)
         elif styleData == "go":
-            ser(225*speed, 0, 0)
+            ser(250*speed, 0, 0)
         elif styleData == "goRight":
-            ser(225*speed, 0, -250*speed_ang)
+            ser(250*speed, 0, -250*speed_ang)
         elif styleData == "goLeft":
-            ser(225*speed, 0, 250*speed_ang)
+            ser(250*speed, 0, 250*speed_ang)
         elif styleData == "right":
             ser(0, 0, -250*speed_ang)
         elif styleData == "left":
             ser(0, 0, 250*speed_ang)
         elif styleData == "back":
-            ser(-225, 0, 0)
+            ser(-250, 0, 0)
         elif styleData == "goaviod":
             '''
             ser(150 * speed * math.cos(th_best), 100 * speed * math.sin(th_best), 0)
@@ -319,7 +346,7 @@ def follow_pub():
             ser(0, 0, ang / abs(ang) * (abs(ang-th_best) + 1.0) * 350)
             rospy.sleep(0.05)
             '''
-            ser(225 * speed * math.cos(th_best), 225 * speed * math.sin(th_best), ang * 400)
+            ser(250 * speed * math.cos(th_best), 250 * speed * math.sin(th_best), ang * 400)
         print "speed:%f" % speed
         print "speed_ang:%f" % speed_ang
         rospy.sleep(0.01)
@@ -332,6 +359,7 @@ if __name__ == "__main__":
     scanData = list()
     styleData = ""
     speed = 0
+    speed_old = 0
     speed_ang = 0
     start_follow = 0
     base_width = 0.6

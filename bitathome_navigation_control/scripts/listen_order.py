@@ -30,7 +30,7 @@ if __name__ == '__main__':
             buf = buf.split(" ")
             print buf
             ret = order()
-            if buf[0] == "order" or buf[0] == "confirm" or buf[0] == "state":
+            if buf[0] == "order" or buf[0] == "confirm" or buf[0] == "state" or buf[0] == "answer":
                 for i in buf:
                     ret.order.append(i)
                 order_pub.publish(ret)

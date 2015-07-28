@@ -33,10 +33,10 @@ def tf_pub():
 if __name__ == "__main__":
     rospy.init_node("joy_tf_control")
     joyData = Joy()
-    x = 0.0
-    y = 0.0
-    theta = 0.0
-    joy_pub = rospy.Subscriber("/joy", Joy, run)
+    x = -0.7
+    y = -8.375
+    theta = 0.030
+    #joy_pub = rospy.Subscriber("/joy", Joy, run)
 
     tf_pub()
 

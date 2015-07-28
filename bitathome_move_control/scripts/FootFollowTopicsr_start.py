@@ -3,14 +3,9 @@
 # Filename : FootFollow.py
 # Author : Csy Mjb
 # E-mail : bitcsy2012@163.com
-# Description : 步态跟随的初级实验
+# Description : 启动语音
 # History
-#   2015/05/16 20:09 : 创建文件 [曹帅毅]
-#   2015/05/20 13:55 : 更改文件 [曹帅毅 马俊邦]
-#   2015/06/22 10:13 : 更改文件 [曹帅毅 马俊邦]
-#   2015/07/08 09:13 : 更改文件 [曹帅毅 马俊邦]
-
-
+#   2015/07/19 15:07 : 创建文件 [曹帅毅]
 
 import rospy, math
 from bitathome_hardware_control.srv import *
@@ -47,6 +42,8 @@ def changeTf(data):
 
 def wait_start():
     global start_follow
+    rospy.sleep(20)
+    print "start"
     while not rospy.is_shutdown():
         if len(scanData) == 0:
             continue
@@ -125,7 +122,7 @@ def Curve():
             fx = Ck[i][j + 1][0] * math.cos(math.radians(Ck[i][j + 1][1] * 0.5 - 135))
             fy = Ck[i][j + 1][0] * math.sin(math.radians(Ck[i][j + 1][1] * 0.5 - 135))
             Lk += math.sqrt((lx - fx) ** 2 + (ly - fy) ** 2)
-        if Dk < 0.1:
+        if Dk < 0.06:
             continue
         curve = Lk / Dk
         #curve1 = Lk / abs(Ck_first_y - Ck_last_y)
@@ -137,7 +134,7 @@ def Curve():
                 yc += Ck[i][k][0] * math.sin(math.radians(Ck[i][k][1] * 0.5 - 135))
             xc /= length
             yc /= length
-            if 0.5 < math.sqrt(xc ** 2 + yc ** 2) < 1.5:
+            if 0.5 < math.sqrt(xc ** 2 + yc ** 2) < 1.0:
                 Curve_data.append([curve, xc, yc])
             #Curve_data1.append([curve, curve1,xc, yc])
         #print Curve_data
@@ -171,7 +168,7 @@ def Judge_reco():
     return Curve_data
 
 def Judge():
-    global Curve_data, X, Y, Curvedata, flag, tf_x, tf_y, x_old, y_old
+    global Curve_data, X, Y, Curvedata, flag, tf_x, tf_y, x_old, y_old, start_flag, X_first, Y_first
     #记录丢失前的世界坐标
     Len = len(Curve_data)
     #Judge_reco()
@@ -179,7 +176,7 @@ def Judge():
     ans = -1
     if X == -100:
         for i in range(0, Len - 1):
-            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 1.0 and Curve_data[i][2] > -1.0 and Curve_data[i][2] < 1.0:
+            if Curve_data[i][1] > 0.5 and Curve_data[i][1] < 1.0 :
                 if minx > math.fabs(Curve_data[i][2]):
                     ans = i
                     minx = Curve_data[i][2]
@@ -187,6 +184,8 @@ def Judge():
         if Len > 0.1 and ans > -1:
             X = Curve_data[ans][1]
             Y = Curve_data[ans][2]
+            X_first = X
+            Y_first = Y
             Curvedata = Curve_data[ans][0]
 
     else:
@@ -197,6 +196,11 @@ def Judge():
                 minx = L_dis
         if Len > 0.1 and ans > -1:
             flag = 0
+            if  math.sqrt((X_first - Curve_data[ans][1]) ** 2  + (Y_first - Curve_data[ans][2]) ** 2 ) > 0.3 and start_flag == 0:
+                print "123455"
+		for i in range(1000):
+                    pub.publish(-200, -200)
+                start_flag = 1
             X = Curve_data[ans][1]
             Y = Curve_data[ans][2]
             Curvedata = Curve_data[ans][0]
@@ -208,8 +212,8 @@ def Judge():
                 X = -100
                 Y = -100
                 Curvedata = None
-    pub.publish(X, Y)
-
+    if start_flag != 0:
+        pub.publish(X, Y)
 
 
 if __name__ == "__main__":
@@ -229,9 +233,12 @@ if __name__ == "__main__":
     #reco_pub = rospy.Subscriber("/FootFollow_Reco", Recoginze, reco_run)
     #start_follow = rospy.Subscriber("/StartFollow", sf, sf_flag)
     #操作函数
+    start_flag = 0
     flag = 0
     X = -100
     Y = -100
+    X_first = 0
+    Y_first = 0
     Curvedata = -1
     #获得机器的世界坐标
     tf = rospy.Subscriber("/tf", tfMessage, changeTf)

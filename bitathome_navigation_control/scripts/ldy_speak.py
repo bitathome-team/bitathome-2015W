@@ -28,30 +28,38 @@ def update_scanData(data):
 
 
 def updata_footData(data):
-    global footData
+    global footData, speakInt
     footData = data
+    if footData.X == -200:
+        print "ok111"
+        speakInt = 5
 
 
 def ldy_speak():
-    global speakData, speakKey, footData
+    global speakData, speakKey, footData, speakInt
     while not rospy.is_shutdown():
-        if footData == FootFollow() or speakData == "":
+        if speakData == "":
             continue
-        if footData.X == -100:
+        if speakInt < 5:
+            say_ser("I, know, " + speakData)
+            print "speak"
+            speakData = ""
+            continue
+        elif footData.X == -100:
             motor_ser(0,0,300)
             speakKey = False
-        elif footData.Y < 0-0.25:
+        elif footData.Y < 0-0.3:
             motor_ser(0,0,-300)
             speakKey = False
-        elif footData.Y > 0.15:
+        elif footData.Y > 0.3:
             motor_ser(0,0,300)
             speakKey = False
         else:
             motor_ser(0,0,0)
             if speakKey:
-                say_ser(speakData)
+                say_ser("I, know, " + speakData)
             else:
-                say_ser("Can you speak again?")
+                say_ser("Sorry, Can, you, speak, again?")
             speakData = ""
         continue
         '''
@@ -98,6 +106,7 @@ if __name__ == "__main__":
     speakData = ""
     speakKey = False
     footData = FootFollow()
+    speakInt = 0
     
     scan_pub = rospy.Subscriber("/scan", LaserScan, update_scanData)
     say_pub = rospy.Subscriber("/speak", Follow, updata_speakData)

@@ -1,0 +1,10 @@
+<launch>
+  <!-- 打开sick 定义base和laser的tf -->
+  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
+
+  <node pkg="bitathome_navigation_control" name="navigation" type="navigation_start.py" output="screen"/>
+
+  <!-- 打开语音节点 输出所说内容 -->
+  <node name="soundplay_node" pkg="sound_play" type="soundplay_node.py" output="screen" />
+  <node name="AudioPlay" pkg="bitathome_remote_control" type="AudioPlay.py" output="screen" />
+</launch>

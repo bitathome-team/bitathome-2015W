@@ -1,0 +1,4 @@
+<launch>
+  <include file = "$(find bitathome_navigation_control)/launch/my_move_base.launch" />
+  <node name="navigation_test" pkg="bitathome_navigation_control" type="inspection.py" output="screen" />
+</launch>

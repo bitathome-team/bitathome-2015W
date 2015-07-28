@@ -5,9 +5,6 @@
   <!-- 打开地图 -->
   <node name="map_server" pkg="map_server" type="map_server" args="$(find bitathome_navigation_control)/maps/map.yaml" />
 
-  <!-- 打开sick 定义base和laser的tf -->
-  <include file = "$(find bitathome_navigation_control)/launch/navigation_configuration.launch" />
-
   <!-- 打开激光定位 提供码盘数据>
   <node pkg="laser_scan_matcher" type="laser_scan_matcher_node" name="laser_scan_matcher_node" output="screen">
     <param name="fixed_frame" value="odom" />
@@ -24,10 +21,11 @@
   <node pkg="bitathome_hardware_control" name="hc_motor_cmd" type="hc_motor_cmd.py" output="screen" />
   
   <node pkg="bitathome_navigation_control" name="my_move_base" type="my_move_base_navigation.py" output="screen" />
-  <node pkg="bitathome_navigation_control" name="my_map" type="my_get_path" output="screen" />
   <!-- node pkg="bitathome_navigation_control" name="my_map_show" type="mapshow.py" output="screen" / -->
   <node pkg="joy" name="joy_node" type="joy_node" />
   <node pkg="bitathome_navigation_control" name="joy_tf_control" type="joy_tf_control.py" />
+  <node pkg="bitathome_navigation_control" name="my_map" type="my_get_path" output="screen" />
 
   <!-- node pkg="tf" type="static_transform_publisher" name="map_odom_broadcaster" args="0 0 0 0 0 0 /map /odom 100" / -->
+
 </launch>

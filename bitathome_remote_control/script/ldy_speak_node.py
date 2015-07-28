@@ -25,7 +25,7 @@ if __name__ == '__main__':
 			ret = Follow()
 			ret.s = ""
 			for i in buf:
-				ret.s += i + " "
+				ret.s += i + ", "
 			print ret.s
 			speak_pub.publish(ret)
 		except Exception,ex:
